@@ -425,6 +425,18 @@ def main(pak_path):
     else:
         r.warn("GameParamDefineTable not in pak (damage cap unchanged)")
 
+    # ---- 5a. blueprint patch: elemental boosts read from every equipped slot ----
+    import blueprint_patch
+    if blueprint_patch.ASSET + ".uexp" in present:
+        problems = blueprint_patch.check(base, mod)
+        r.check(not problems, "elemental damage boosts count on every equipped piece "
+                              "(BattlePlayerBP: 4 bytes, exactly as planned)",
+                "; ".join(problems))
+    else:
+        import build_all
+        if build_all.NEW_GEAR:
+            r.check(False, "", "BattlePlayerBP patch missing: Sigils and Hearts do nothing")
+
     # ---- 5b. battle tunables: only Tressa's Collect amounts, and only upward ----
     BP = B.BATTLE_PARAMS
     if BP + ".uexp" in present:
@@ -463,6 +475,8 @@ def main(pak_path):
     # ---- 6. structural ----------------------------------------------------
     log.info("[6] structure")
     for path in sorted({n[:-len(".uexp")] for n in present if n.endswith(".uexp")}):
+        if path == blueprint_patch.ASSET:
+            continue                            # a blueprint, checked byte-exactly in [5a]
         try:
             dt.verify(mod.read(path + ".uasset"), mod.read(path + ".uexp"))
             r.ok(f"{path.split('/')[-1]} structure OK")

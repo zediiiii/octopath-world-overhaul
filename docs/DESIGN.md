@@ -98,10 +98,21 @@ a different one. Every description is regenerated from the row's real data by th
   and truncated to four on the next save.
 - Extended name tables load and work in-game.
 
+## Blueprint patch: elemental boosts on every slot
+
+`BattlePlayerBP.GetOnHitDamageDiseaseRatio` multiplies a player's hit by buffs and support
+skills, then by `SearchWeaponAbilityUpFromAllWeapon` (physical) and
+`SearchMagicAbilityUpFromAllWeapon` (the spell's element). Both start at 100 and add
+`value − 100` for every matching boost on the slots listed in `EquipmentWeapon` — weapons
+only. Resistances (`MigicResist`, built in `InitEquipmentData`) sum the same way over all 11
+slots, floored at 0. `blueprint_patch.py` makes the elemental search loop over `Equipment`
+(always 11 entries, slot order) and index it by the loop counter: two same-size reference
+swaps, 4 bytes, no jump moves. It refuses to patch anything but the exact shipped code, and
+`validate.py` re-derives the patch and compares byte for byte. Verified in-game: x10 Fire on
+two accessories multiplied Cyrus's spell damage ~10x. `kismet.py` is the disassembler used.
+
 ## Not yet verified
 
-- Elemental damage boosts on **accessories** (Sigils, Hearts) — shipped data only puts them on
-  weapons.
 - The exact steal-threshold semantics.
 
 ## Validation

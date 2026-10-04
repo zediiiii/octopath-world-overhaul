@@ -229,7 +229,7 @@ def describe(stats, ails, immune=()):
     up, res, regen, procs, gains = {}, {}, {}, {}, {}
     for a, v, turn, rate in ails:
         if a == "WEAPON_ABILITY_UP":
-            attack.append(f"+{v - 100}% Physical damage")
+            attack.append(f"+{v - 100}% Physical damage (stacks across weapons)")
         elif a == "DOUBLE_HIT":
             attack.append("every regular attack hits twice")
         elif a == "HIT_OR_MISS":
@@ -274,10 +274,15 @@ def describe(stats, ails, immune=()):
         for a, label in (("EXPUP", "EXP"), ("JPUP", "JP")):
             if a in gains:
                 equip.append(f"+{gains[a] - 100}% {label} for the party")
-    for v, els in up.items():
-        equip.append(f"+{v - 100}% {_join(els)} damage dealt")
-    for v, els in res.items():
-        equip.append(f"-{100 - v}% {_join(els)} damage taken")
+    # How these combine was read from BattlePlayerBP: each element's boosts are summed over
+    # every equipped piece (100% + sum of (value - 100)) and the total multiplies the hit
+    # after skills and buffs; resistances sum the same way, down to 0% (immune).
+    boosts = [f"+{v - 100}% {_join(els)} damage dealt" for v, els in up.items()]
+    boosts += [f"-{100 - v}% {_join(els)} damage taken" for v, els in res.items()]
+    if boosts:
+        boosts[-1] += (" (each stacks with all gear and skills)" if len(boosts) > 1
+                       else " (stacks with all gear and skills)")
+        equip += boosts
     if regen:
         what = _join([f"{regen[k]} {k}" for k in ("HP", "SP") if k in regen])
         equip.append(f"restores {what} after every turn")
@@ -293,12 +298,17 @@ def describe(stats, ails, immune=()):
         eff.append("Attack: " + cap("; ".join(attack)))
     if equip:
         eff.append("Equip: " + cap(", ".join(equip)))
+    # the same effects with a long Equip line wrapped onto a second line
+    wrapped = list(eff)
+    if equip and len(equip) > 1:
+        cut = max(1, len(equip) // 2)
+        wrapped[-1:] = ["Equip: " + cap(", ".join(equip[:cut])),
+                        cap(", ".join(equip[cut:]))]
 
     def fits(lines):
         return len(lines) <= MAX_LINES and all(len(x) <= MAX_LINE_CHARS for x in lines)
     # as few stat lines as fit, effects on their own lines; merge the effects if needed
-    for merged in (False, True):
-        tail = ([". ".join(eff)] if eff else []) if merged else eff
+    for tail in (eff, [". ".join(eff)] if eff else [], wrapped):
         for per in (4, 5, 3, 10):
             lines = [", ".join(parts[i:i + per]) for i in range(0, len(parts), per)] + tail
             if fits(lines):

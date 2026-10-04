@@ -31,7 +31,8 @@ Keeps every part of the game a real fight, from the first chapter to the post-ga
 [*]Five tiers sold in Grandport as the world reaches them, and as rare drops (bosses always drop one).
 [*]Every item boosts several stats; full descriptions with exact numbers.
 [*]Weapon styles with on-hit effects (vulnerability, weakness, slow…), Twinfang double strikes, Gambler's crit-or-miss, Headsman's instant kill, dual-element weapons, Hallowed healer weapons, a physical War Staff for Winnehild's Battle Cry.
-[*]Status-immunity talismans, regen pendants, elemental wards, EXP/JP tokens.
+[*]Status-immunity talismans, regen pendants, elemental wards, sigils and hearts, EXP/JP tokens.
+[*]Elemental damage boosts on armour and accessories actually work (a tiny patch to the battle code - the game only counted weapons). Every description says how it stacks.
 [*]Big SP and %HP restoratives; late-game drops (and steals) upgrade to Revitalizing Jam and friends.
 [/list]
 
@@ -49,7 +50,7 @@ Three presets (classic / adaptive / relentless) and every feature can be switche
 Extract anywhere, run OctopathWorldOverhaul.exe, let it hook Steam's Play button (or make a desktop shortcut), pick your save, play. The world is rebuilt from your save whenever your progress changes (~15 s).
 
 [size=4][b]Compatibility[/b][/size]
-Steam version on Windows. Works with Better Descriptions and Side Stories Helper. Conflicts with other mods that replace EnemyDB, ItemDB, ShopList or EncountVolumeData (this one loads last and wins).
+Steam version on Windows. Works with Better Descriptions and Side Stories Helper. Conflicts with other mods that replace EnemyDB, ItemDB, ShopList, EncountVolumeData or BattlePlayerBP (this one loads last and wins).
 
 [size=4][b]Notes[/b][/size]
 [list]

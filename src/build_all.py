@@ -193,6 +193,13 @@ def main(out_path=None, install=False):
         files[base + ".uasset"], files[base + ".uexp"] = lua2, lue2
     print(f"item names added to {1 + len(forge.other_languages())} language tables")
 
+    if NEW_GEAR:
+        # Sigils / Hearts / armour boosts: make the game count elemental damage boosts on
+        # every equipped piece, not only weapons (see blueprint_patch.py)
+        import blueprint_patch
+        files.update(blueprint_patch.patched_files(pak.Pak(paths.base_pak())))
+        print("elemental damage boosts count on armour and accessories too")
+
     if FAST_TRAVEL:
         import build_fasttravel_mod
         ft = build_fasttravel_mod.patched_files(pak.Pak(paths.base_pak()))

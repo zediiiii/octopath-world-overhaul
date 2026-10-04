@@ -63,8 +63,16 @@ delete the folder and the desktop shortcut. Your saves were never touched.
 - **Armour** in Heavy / Warded / Nimble variants, **Clearmind** and **Purity** immunity
   pieces, **Berserker Mail**.
 - **Accessories**: stat charms, SP / HP regeneration pendants, EXP / JP tokens, status
-  **talismans** (up to full immunity), elemental **wards** and **hearts**, Hunter's Lure.
-- **Full descriptions** — every stat and effect is listed with its exact number.
+  **talismans** (up to full immunity), elemental **wards**, **sigils** and **hearts**,
+  Hunter's Lure.
+- **Full descriptions** — every stat and effect is listed with its exact number, and how it
+  stacks.
+- **Elemental damage boosts work on armour and accessories.** The game only counted them on
+  weapons; a 4-byte patch to its battle blueprint makes it count every equipped piece.
+  Boosts of one element add up across all your gear (+30% staff + 20% sigil = +50%), and
+  the total multiplies with support skills and buffs. Physical damage boosts add up across
+  equipped weapons; elemental resistances add up across all gear, down to full immunity
+  (as in vanilla).
 - New consumables: **Invigorating Draught / Cask** (500 / 300 SP) and **Vital Draught /
   Cask** (50% / 35% max HP). From danger 68, ordinary enemy drops (and Therion's steals)
   become Revitalizing Jam, Olive of Life, and these.
