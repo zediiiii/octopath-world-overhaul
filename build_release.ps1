@@ -10,6 +10,7 @@ python -m PyInstaller --noconfirm --clean --onefile --windowed `
     --paths src `
     --hidden-import config --hidden-import build_all --hidden-import validate `
     --hidden-import build_fasttravel_mod --hidden-import steam_setup `
+    --hidden-import blueprint_patch --hidden-import kismet `
     src\launch_octopath.py
 if ($LASTEXITCODE -ne 0) { throw "PyInstaller failed" }
 
