@@ -1,0 +1,4 @@
+# The mod itself needs only the Python standard library (3.10+, with tkinter).
+# This is for packaging the release exe and for dev/ screenshots.
+pyinstaller>=6.0
+pillow

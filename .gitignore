@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+build/
+dist/
+logs/
+backups/
+*.pak
+*.pak.new
+*.sav
+overhaul.ini
+setup_done.json
+*.spec
