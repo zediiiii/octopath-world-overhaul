@@ -10,3 +10,4 @@ backups/
 overhaul.ini
 setup_done.json
 *.spec
+save_snapshot/
