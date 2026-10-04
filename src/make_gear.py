@@ -193,7 +193,7 @@ class GearForge:
 
     # ---- gear ----------------------------------------------------------
     def forge(self, template, name, desc, stats, ailment=None, price=None, item_id=None,
-              immune=()):
+              immune=(), sell_ratio=0.1):
         """Clone `template` (an existing row key) into a new item.
 
         stats   : {"ATK": 1200, ...} absolute values for EquipmentRevision
@@ -231,7 +231,7 @@ class GearForge:
         dt.set_fname(buf, one("DetailTextID", "NameProperty"), anchor_i, desc_num)
         if price is not None:
             dt.set_int(buf, one("BuyPrice"), price)
-            dt.set_int(buf, one("SellPrice"), max(1, price // 10))
+            dt.set_int(buf, one("SellPrice"), max(1, int(price * sell_ratio)))
 
         # Start from zero: templates carry their own stats (the sword template has +150
         # Critical) which would otherwise leak onto new gear unlisted.

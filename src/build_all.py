@@ -48,6 +48,12 @@ FAST_TRAVEL = True
 CONSUMABLE_UPGRADES = True
 CAP_TEST_IN_SHOP = False
 
+# Tier equipment sells back for half its price (user 2026-10-04), so a piece bought to
+# compare in the Equip menu - the shop's panel can't show every stat - costs half, not 90%.
+# The new consumables keep the 1/10 that stops drop upgrades from being a money farm.
+GEAR_SELL_RATIO = 0.5
+CONSUMABLE_SELL_RATIO = 0.1
+
 # A tier is only sold - or dropped - once the world is within this many danger points of it.
 # It was 10, which let tier 60 be bought at danger 50 where it is ~1.5x too strong.
 LOOKAHEAD = 5
@@ -148,7 +154,9 @@ def main(out_path=None, install=False):
     for spec in cat:
         info = forge.forge(spec["template"], spec["name"], spec["desc"], spec["stats"],
                            ailment=spec["ailment"], price=spec["price"],
-                           immune=spec.get("immune", ()))
+                           immune=spec.get("immune", ()),
+                           sell_ratio=(CONSUMABLE_SELL_RATIO if spec["kind"] == "consumable"
+                                       else GEAR_SELL_RATIO))
         info.update(tier=spec["tier"], kind=spec["kind"])
         minted.append(info)
     if CAP_TEST_ITEM:

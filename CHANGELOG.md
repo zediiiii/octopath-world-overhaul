@@ -7,6 +7,7 @@
   until the chapter 4s, then steps up (story +5, party +4, bosses ×2, superbosses ×4)
   instead of the old 8 + 3 per chapter curve that punished the mid game.
   `vanilla_start = false` restores full strength from the start.
+- New equipment sells back for 50% of its price (was 10%); the new consumables stay at 10%.
 - The save picker shows each save's danger for the configured preset (it used the defaults).
 
 ## 1.0.0-beta.1
