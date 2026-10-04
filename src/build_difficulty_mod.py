@@ -231,11 +231,84 @@ def expected_danger(chapters):
     return pts[-1][1]
 
 
+# ---- how hard, by stage of the game ---------------------------------------------------
+# The chapter 1s play as vanilla and the preset's full strength builds up through the
+# mid game (user 2026-10-04: harder curves were fun late, not early). RAMP is a list of
+# (stage, settings) anchors set by config.apply(), interpolated linearly between them. The
+# stage is the story's recommended danger, or the party's level less STAGE_PARTY_LEAD when
+# that is higher, so a party far ahead of the story moves the game on. None = the module
+# settings above apply unchanged.
+RAMP = None
+STAGE_PARTY_LEAD = 10
+# party_margin has no "off" number to interpolate from; this stands in for it
+PARTY_MARGIN_OFF = -12
+ENEMY_LEVEL_WEIGHT = 1.0  # 0 = vanilla enemy levels, 1 = at least the party's level
+STAGE = None              # (stage, settings) of the last world_floor() call, for logs
+FLOOR_ACTIVE = True       # False when the stage's floor is below danger 1 (see world_floor)
+
+
+def stage_of(progress, party_lv):
+    return max(expected_danger(progress // PROGRESS_PER_QUEST), party_lv - STAGE_PARTY_LEAD)
+
+
+def settings_at(stage, ramp=None):
+    """Interpolate the RAMP anchors at `stage` -> settings dict."""
+    pts = ramp or RAMP
+    if stage <= pts[0][0]:
+        return dict(pts[0][1])
+    if stage >= pts[-1][0]:
+        return dict(pts[-1][1])
+    for (s0, a), (s1, b) in zip(pts, pts[1:]):
+        if stage <= s1:
+            w = (stage - s0) / (s1 - s0)
+            break
+    out = {}
+    for k in b:
+        x, y = a[k], b[k]
+        if isinstance(x, bool) or isinstance(y, bool):
+            out[k] = y if w >= 0.5 else x
+        elif k == "party_margin":
+            if x is None and y is None:
+                out[k] = None
+                continue
+            x = PARTY_MARGIN_OFF if x is None else x
+            y = PARTY_MARGIN_OFF if y is None else y
+            v = x + (y - x) * w
+            out[k] = None if v <= PARTY_MARGIN_OFF else round(v, 2)
+        else:
+            out[k] = round(x + (y - x) * w, 3)
+    return out
+
+
+def apply_settings(s):
+    global PROGRESS_MARGIN, PARTY_MARGIN, LEGACY_FLOOR, BOSS_HP_MULT, SUPERBOSS_HP_MULT
+    global ENEMY_LEVEL_WEIGHT, SET_ENEMY_LEVEL, STEAL_LEVEL_SHIFT, HARD_AREA_DISPLAY
+    PROGRESS_MARGIN = s["progress_margin"]
+    PARTY_MARGIN = s["party_margin"]
+    LEGACY_FLOOR = s["legacy_floor"]
+    BOSS_HP_MULT = s["boss_hp_mult"]
+    SUPERBOSS_HP_MULT = s["superboss_hp_mult"]
+    ENEMY_LEVEL_WEIGHT = s["enemy_level"]
+    SET_ENEMY_LEVEL = "party" if ENEMY_LEVEL_WEIGHT > 0 else False
+    # steal thresholds shift with how far enemy levels were raised (see STEAL_LEVEL_SHIFT)
+    STEAL_LEVEL_SHIFT = round(11 * ENEMY_LEVEL_WEIGHT)
+    HARD_AREA_DISPLAY = s["hard_area_display"]
+
+
 def world_floor(progress, party_lv):
-    """-> (floor, explanation)."""
+    """-> (floor, explanation). With a RAMP, first applies this stage's settings."""
+    global STAGE
     chapters = progress // PROGRESS_PER_QUEST
+    why = []
+    if RAMP:
+        stage = stage_of(progress, party_lv)
+        s = settings_at(stage)
+        apply_settings(s)
+        STAGE = (stage, s)
+        why.append(f"stage {stage:.0f}: boss HP x{BOSS_HP_MULT:g}, enemy levels "
+                   f"{ENEMY_LEVEL_WEIGHT:.0%} of party")
     story = expected_danger(chapters) + PROGRESS_MARGIN
-    why = [f"story {story:.0f} ({chapters} chapters)"]
+    why.insert(0, f"story {story:.0f} ({chapters} chapters)")
     if LEGACY_FLOOR:
         legacy = BASE_DANGER + PER_QUEST * chapters
         story = max(story, legacy)
@@ -243,7 +316,14 @@ def world_floor(progress, party_lv):
     party = party_lv + PARTY_MARGIN if PARTY_MARGIN is not None else 0
     if PARTY_MARGIN is not None:
         why.append(f"party {party_lv}{PARTY_MARGIN:+g}")
-    floor = int(round(min(MAX_DANGER, max(story, party))))
+    raw = max(story, party)
+    # The opening stage asks for less than danger 1, the lowest there is: no floor at all,
+    # rather than raising the weakest starting-area enemies to danger 1's median.
+    global FLOOR_ACTIVE
+    FLOOR_ACTIVE = raw >= 1
+    if not FLOOR_ACTIVE:
+        why.append("below danger 1: regular enemies as shipped")
+    floor = int(round(min(MAX_DANGER, max(1, raw))))
     return floor, ", ".join(why)
 
 
@@ -454,9 +534,10 @@ def build(out_path=None, save_path=None, verbose=True, pack=True):
     p = pak.Pak(paths.base_pak())
     save, progress = quests_done(save_path)
     party_lv = party_level(save)
-    if verbose and SET_ENEMY_LEVEL == "party":
-        print(f"party average level {party_lv}: enemy and boss levels raised to at least that")
     floor, why = world_floor(progress, party_lv)
+    if verbose and SET_ENEMY_LEVEL == "party":
+        print(f"party average level {party_lv}: enemy and boss levels raised to at least "
+              f"{round(party_lv * ENEMY_LEVEL_WEIGHT)}")
     if verbose:
         print(f"save {os.path.basename(save)}: MainProgressPoint={progress}, party level "
               f"{party_lv} -> world danger floor {floor} (max of {why})")
@@ -492,7 +573,7 @@ def build(out_path=None, save_path=None, verbose=True, pack=True):
     cls = enemy_classes(p, rows)
     natives = boss_natives(p, rows, cls, curve, levels)
 
-    level_to = party_lv if SET_ENEMY_LEVEL == "party" else floor
+    level_to = round(party_lv * ENEMY_LEVEL_WEIGHT) if SET_ENEMY_LEVEL == "party" else floor
 
     def set_level(i):
         """Enemy level drives BATTLE_DAMAGE_LEVEL_RATIO (4%/level, capped 3.1x)."""
@@ -547,7 +628,7 @@ def build(out_path=None, save_path=None, verbose=True, pack=True):
             continue
         set_level(i)
         changed = False
-        for f in STATS:
+        for f in (STATS if FLOOR_ACTIVE else []):
             o = offs[f][i]
             old = struct.unpack_from("<i", ue, o)[0]
             if old <= 0:                      # 0 means "not used" for some rows; leave it

@@ -44,7 +44,15 @@ floor = max( story(chapters) + progress_margin ,  party_average_level + party_ma
 
 `story()` is a staircase built from the game's own chapter recommendations (`TownTable`):
 chapter 1s 5–12, chapter 2s 21–27, chapter 3s 32–40, chapter 4s 45, finale 50.
-`relentless` also takes `8 + 3 × chapters`. Every **random-encounter** enemy is raised
+`legacy_floor = true` also takes the original `8 + 3 × chapters` (no preset uses it now).
+
+**Stage ramp.** The preset values above are its *full* strength. The game's stage is
+`max(story(chapters), party_level − 10)`; at stage ≤ 12 (the chapter 1s) every preset uses
+vanilla settings (no floor in the story's areas, vanilla enemy levels, boss HP ×1), blending
+linearly to the preset's values by stage 30. `relentless` is `adaptive` from 30 to 40, then
+blends to its own values by 50. `party_margin` blends from "off" via −12; enemy levels
+rise to `weight × party level` and the steal-threshold shift follows the same weight.
+Every **random-encounter** enemy is raised
 (never lowered) to the vanilla enemy profile at the floor — the per-level median of the
 game's own enemies, made non-decreasing — and its EXP / JP / money with it.
 

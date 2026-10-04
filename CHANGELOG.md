@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- Every preset now plays the chapter 1s as vanilla (no extra enemy or boss HP, vanilla enemy
+  levels) and builds up to full strength through the mid game. `relentless` is `adaptive`
+  until the chapter 4s, then steps up (story +5, party +4, bosses ×2, superbosses ×4)
+  instead of the old 8 + 3 per chapter curve that punished the mid game.
+  `vanilla_start = false` restores full strength from the start.
+- The save picker shows each save's danger for the configured preset (it used the defaults).
+
 ## 1.0.0-beta.1
 
 First public build.

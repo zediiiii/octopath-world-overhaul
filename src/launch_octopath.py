@@ -69,12 +69,15 @@ def save_summary(path):
     party = [f"{rc.CHAR_NAMES.get(c, '?')} {lv.get(c, 0)}" for c in ids if lv.get(c, 0) > 0]
     party_lv = B.party_level(path)
     floor, _why = B.world_floor(progress, party_lv)
+    # the opening stage leaves the story's areas as shipped
+    danger = "vanilla" if B.RAMP and B.STAGE and B.STAGE[0] <= B.RAMP[0][0] else str(floor)
     secs = getattr(slot.get("PlayTime"), "value", 0) or 0
     num = os.path.basename(path)[8:-4]
     return dict(path=path, slot=("Autosave" if num == "0" else f"Slot {num}"),
                 saved=time.strftime("%Y-%m-%d %H:%M", time.localtime(os.path.getmtime(path))),
                 play=f"{secs // 3600}h{secs // 60 % 60:02d}", chapters=progress // 8,
-                party=", ".join(party), party_lv=party_lv, floor=floor, progress=progress)
+                party=", ".join(party), party_lv=party_lv, floor=floor, danger=danger,
+                progress=progress)
 
 
 def pick_save(saves, timeout):
@@ -100,16 +103,16 @@ def pick_save(saves, timeout):
     ttk.Label(frm, text="The world is built for the save you pick. Load the SAME save in "
                         "the game (Continue loads the most recent one).",
               wraplength=760).pack(anchor="w", pady=(0, 8))
-    cols = ("slot", "saved", "play", "chapters", "party", "floor")
+    cols = ("slot", "saved", "play", "chapters", "party", "danger")
     tv = ttk.Treeview(frm, columns=cols, show="headings", height=min(12, len(infos)))
     for c, w, t in (("slot", 80, "Save"), ("saved", 120, "Last saved"), ("play", 70, "Played"),
                     ("chapters", 70, "Chapters"), ("party", 320, "Party"),
-                    ("floor", 90, "World danger")):
+                    ("danger", 90, "World danger")):
         tv.heading(c, text=t)
         tv.column(c, width=w, anchor="w")
     for i, s in enumerate(infos):
         tv.insert("", "end", iid=str(i), values=(s["slot"], s["saved"], s["play"],
-                                                   s["chapters"], s["party"], s["floor"]))
+                                                   s["chapters"], s["party"], s["danger"]))
     tv.selection_set("0")
     tv.pack(fill="both", expand=True)
     msg = ttk.Label(frm, text="")
@@ -229,7 +232,7 @@ def update(save_path, log=print):
         except ValueError:
             have = {}
     log(f"save: {info['slot']} ({info['chapters']} chapters, party level {info['party_lv']}) "
-        f"-> world danger {info['floor']}, preset {cfg['preset']}")
+        f"-> world danger {info['danger']}, preset {cfg['preset']}")
     if have == want and os.path.exists(installed):
         log("installed overhaul is already up to date.")
         return True
@@ -239,7 +242,7 @@ def update(save_path, log=print):
     def work():
         buildlog.run(build_all.build_and_check, installed, name="launcher_build")
     err = with_progress(work, f"Building the world for {info['slot']} "
-                              f"(danger {info['floor']}, preset {cfg['preset']}) ...")
+                              f"(danger {info['danger']}, preset {cfg['preset']}) ...")
     if err is None:
         with open(stamp_path(), "w", encoding="utf-8") as f:
             json.dump(want, f)
@@ -319,8 +322,8 @@ def main(argv):
         return 0
     import config
     import steam_setup
-    cfg = config.load()
-    paths.OVERRIDES.update(game_dir=cfg["game_dir"], save_dir=cfg["save_dir"])
+    # applied now, not just loaded: the save picker shows each save's world danger
+    cfg = config.apply(config.load())
     if wrap is None and steam_setup.game_running():
         print("The game is already running.")
         return 0

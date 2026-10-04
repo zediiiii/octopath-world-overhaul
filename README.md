@@ -84,13 +84,17 @@ All of these can be switched off individually.
 
 ## Settings — `overhaul.ini`
 
-Created next to the exe on first run. Three presets:
+Created next to the exe on first run. Every preset plays the **chapter 1s exactly as
+vanilla** and builds up to its full strength through the chapter 2s and 3s; `relentless`
+adds its extra step through the chapter 4s and the finale. Three presets (full strength):
 
 | Preset | For | World | Boss / superboss HP |
 |---|---|---|---|
 | `classic` | vanilla feel | the story's own curve | ×1 / ×1, vanilla enemy levels |
 | `adaptive` *(default)* | most players | a little above the story, never below your party | ×1.25 / ×1.25 |
-| `relentless` | strong, over-levelled parties | steep: +3 per chapter from 8, party +4 | ×2 / ×4 |
+| `relentless` | strong, over-levelled endgame parties | story +5, at least party level +4 | ×2 / ×4 |
+
+`vanilla_start = false` under `[tuning]` applies the full strength from the start.
 
 Every value can be overridden under `[tuning]`, and every system turned off under
 `[features]`. See [docs/BALANCE.md](docs/BALANCE.md) for what each preset does at every

@@ -20,12 +20,45 @@ PRESETS = {
     "adaptive": dict(progress_margin=2, party_margin=0, legacy_floor=False,
                      boss_hp_mult=1.25, superboss_hp_mult=1.25, enemy_level="party",
                      hard_area_display=False),
-    # The original overhaul: +3 danger per chapter from 8, at least party level + 4, bosses
-    # x2 HP and superbosses x4. Built for a strong, over-levelled endgame party.
-    "relentless": dict(progress_margin=2, party_margin=4, legacy_floor=True,
+    # Adaptive through the mid game, then a step harder for a strong endgame party: enemies
+    # at least party level + 4, bosses x2 HP, superbosses x4. (The original 8 + 3 per
+    # chapter curve is still available as legacy_floor = true, but it punished the mid game.)
+    "relentless": dict(progress_margin=5, party_margin=4, legacy_floor=False,
                        boss_hp_mult=2.0, superboss_hp_mult=4.0, enemy_level="party",
                        hard_area_display=True),
 }
+
+# The opening of every preset: the chapter 1s play as vanilla (user 2026-10-04: "keep a more
+# vanilla curve at the start ... we don't want HP up in early game"). Areas more than 10
+# danger behind the story are still raised so old haunts don't become trivial.
+VANILLA_START = dict(progress_margin=-10, party_margin=None, legacy_floor=False,
+                     boss_hp_mult=1.0, superboss_hp_mult=1.0, enemy_level="vanilla",
+                     hard_area_display=False)
+# Stages (see build_difficulty_mod.stage_of): 12 = chapter 1s done, 30 = into the chapter
+# 3s, 40-50 = chapter 4s and the finale.
+RAMP_START = 12
+RAMP_FULL = 30
+RELENTLESS_FROM = 40
+RELENTLESS_FULL = 50
+
+
+def ramp(cfg):
+    """(stage, settings) anchors for build_difficulty_mod.RAMP, or None for no ramp."""
+    if not cfg.get("vanilla_start", True):
+        return None
+    keys = list(VANILLA_START)
+
+    def norm(d):
+        d = {k: d[k] for k in keys}
+        d["enemy_level"] = 1.0 if d["enemy_level"] == "party" else 0.0
+        return d
+    full = norm(cfg)
+    if cfg["preset"] == "relentless":
+        mid = norm(PRESETS["adaptive"])
+        return [(RAMP_START, norm(VANILLA_START)), (RAMP_FULL, mid),
+                (RELENTLESS_FROM, mid), (RELENTLESS_FULL, full)]
+    return [(RAMP_START, norm(VANILLA_START)), (RAMP_FULL, full)]
+
 
 FEATURES = {
     "scale_world": True,          # enemies, bosses, rewards, area danger
@@ -45,9 +78,11 @@ DEFAULT_INI = """\
 ; Changes take effect the next time you launch through OctopathWorldOverhaul.exe.
 
 [general]
+; Every preset plays the chapter 1s as vanilla and builds up through the mid game.
 ; classic    - vanilla difficulty curve, plus the new gear, caps and quality of life
 ; adaptive   - a little harder than vanilla, and enemies never fall below your party level
-; relentless - the original overhaul: steep scaling, bosses x2 HP, superbosses x4
+; relentless - adaptive, then a step harder from the chapter 4s: enemies above your
+;              party's level, bosses x2 HP, superbosses x4
 preset = adaptive
 ; Which save the world is built for. "ask" shows a picker at launch (pick the save you
 ; will load!); "newest" always uses the most recently saved slot.
@@ -71,7 +106,10 @@ scale_tressa_collect = true
 consumable_upgrades = true
 
 [tuning]
-; Leave empty to use the preset's value.
+; true = the chapter 1s play as vanilla and the preset's values below build up through
+; the mid game; false = full strength from the start.
+vanilla_start = true
+; Leave empty to use the preset's value (its full, late-game strength).
 progress_margin =
 party_margin =
 boss_hp_mult =
@@ -112,7 +150,9 @@ def load():
         v = v.strip()
         if not v:
             continue
-        if k == "enemy_level":
+        if k == "vanilla_start":
+            cfg[k] = v.lower() in ("1", "true", "yes", "on")
+        elif k == "enemy_level":
             if v not in ("party", "vanilla"):
                 raise ValueError("overhaul.ini: enemy_level must be party or vanilla")
             cfg[k] = v
@@ -144,6 +184,8 @@ def apply(cfg):
     B.SET_ENEMY_LEVEL = "party" if cfg["enemy_level"] == "party" else False
     B.STEAL_LEVEL_SHIFT = 11 if B.SET_ENEMY_LEVEL else 0
     B.HARD_AREA_DISPLAY = cfg["hard_area_display"]
+    # the per-stage values above are overwritten at build time from these anchors
+    B.RAMP = ramp(cfg)
     if "max_danger" in cfg:
         B.MAX_DANGER = int(cfg["max_danger"])
     B.SCALE_WORLD = f["scale_world"]

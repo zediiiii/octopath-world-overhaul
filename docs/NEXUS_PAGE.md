@@ -18,6 +18,7 @@ Keeps every part of the game a real fight, from the first chapter to the post-ga
 
 [size=4][b]A world that keeps up[/b][/size]
 [list]
+[*]The chapter 1s play exactly as vanilla; the scaling builds up through the mid game.
 [*]Enemies scale with your story (the game's own recommended levels) and never fall below your party's level — EXP, JP and money scale with them.
 [*]Bosses scale from the level they were designed for: a chapter 1 boss you leave for later is still a fight.
 [*]Superbosses stay as they are until the world outgrows them.
