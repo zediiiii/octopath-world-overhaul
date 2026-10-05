@@ -271,8 +271,16 @@ def update(save_path, log=print):
 
 def with_progress(fn, text):
     """Run fn in a thread behind a small 'please wait' window. -> None or an error string."""
+    import gc
     import threading
     box = {"err": None}
+    # The save picker's Tk objects can still be waiting for the garbage collector. If the
+    # build thread's automatic collection frees them, Tk aborts the whole process
+    # ("Tcl_AsyncDelete: async handler deleted by the wrong thread") - the launcher just
+    # vanished mid-build under Steam. Collect them here, on the main thread, and keep the
+    # collector off until the build is done.
+    gc.collect()
+    gc.disable()
 
     def run():
         try:
@@ -305,6 +313,7 @@ def with_progress(fn, text):
     except Exception:                                    # noqa: BLE001 (no display)
         pass
     th.join()
+    gc.enable()
     return box["err"]
 
 
@@ -328,6 +337,9 @@ def main(argv):
         logf = open(os.path.join(paths.log_dir(), "launcher.log"), "a", encoding="utf-8")
         sys.stdout = sys.stderr = logf
         print(f"\n==== {time.ctime()}  {version.VERSION}  args={argv}")
+        sys.stdout.flush()
+        import faulthandler
+        faulthandler.enable(file=logf)          # hard crashes leave a trace in this log
     print(f"Octopath Traveler - World Overhaul {version.VERSION}\n")
     if "--setup" in argv:
         setup_dialog()

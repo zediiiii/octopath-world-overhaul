@@ -3,6 +3,9 @@
 ## 1.0.0-beta.2 — Orsterra Unbound
 
 - New name: **Orsterra Unbound**.
+- **Fixed: the launcher could vanish mid-build** after you picked a save (a Python/Tk
+  crash when the save picker's leftovers were cleaned up from the build thread). Hard
+  crashes now also leave a trace in logs/launcher.log.
 - **Chapters are counted correctly.** The save's MainProgressPoint weighs chapters 1/2/3/4
   as 1/4/8/16 points; it was read as 8 per chapter, so the story looked far less advanced
   than it was in the early and mid game (all chapter 2s done read as 5 chapters, not 16).
