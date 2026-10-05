@@ -246,6 +246,87 @@ def expected_danger(chapters):
     return pts[-1][1]
 
 
+# ---- completion (relentless) --------------------------------------------------------
+# Relentless lets the whole game's completion drive the world past the story: danger =
+# COMPLETION_TOP x a weighted share of main chapters, side stories, optional bosses fought
+# and areas visited (user 2026-10-04: "the highest tier is 104 ... you'll get there by
+# completing the main quests + the optional bosses and areas and quests"). The main story
+# alone lands near the game's own endgame (~52); everything optional carries it to 104.
+COMPLETION_TOP = 104
+COMPLETION_WEIGHTS = {"chapters": 0.50, "side_stories": 0.20, "optional_bosses": 0.20,
+                      "areas": 0.10}
+COMPLETION_FLOOR = 0.0    # 0..1, how much of the completion floor applies (set per stage)
+SUB_MISSIONS = "Octopath_Traveler/Content/Mission/Database/Sub_MissionRecord"
+# VisitedMap bits seen up to 193 in a 27-chapter save; the exact number of reachable maps
+# isn't in the data, so areas count against this and cap at 100%
+AREA_TOTAL = 190
+# optional bosses, grouped into one fight each: shrine gods, rematches, optional beasts and
+# Galdera (all of BOS_Lst_* is the one two-phase fight). A bestiary entry counts as fought;
+# EnemyIDs that other rows share are ignored (three of Galdera's hands reuse Olberic's
+# chapter 1-2 boss IDs, which made Galdera look fought).
+OPTIONAL_BOSS_GROUP = (
+    (re.compile(r"BOS_Ext_Job_(\d{3})"), "shrine {}"),
+    (re.compile(r"BOS_Ext_Rev_\d(\d{2})"), "rematch {}"),
+    (re.compile(r"EVE_EXT_(\d{3})_"), "beast {}"),
+    (re.compile(r"BOS_Lst_"), "galdera"),
+)
+# The game's hardest fight. Relentless pins it at a fixed danger (FINAL_BOSS_DANGER, from
+# config) instead of the world's, so there is always a peak to work toward.
+FINAL_BOSS_PREFIX = "BOS_Lst_"
+FINAL_BOSS_DANGER = 0     # 0 = scale with the world like the other superbosses
+_COMPLETION_DATA = {}
+LAST_COMPLETION = None    # completion() of the save the last build() was made for
+
+
+def _completion_data():
+    """(records per side-story area, {boss group: [EnemyID]}) from the game data, cached."""
+    if not _COMPLETION_DATA:
+        p = pak.Pak(paths.base_pak())
+        rec = uasset.read_datatable(p.read(SUB_MISSIONS + ".uasset"), p.read(SUB_MISSIONS + ".uexp"))
+        per_area = {}
+        for v in rec.values():
+            a = g(v, "AreaIndex")
+            per_area[a] = per_area.get(a, 0) + 1
+        rows = uasset.read_datatable(p.read(ENEMY + ".uasset"), p.read(ENEMY + ".uexp"))
+        uses = {}
+        for v in rows.values():
+            uses[g(v, "EnemyID")] = uses.get(g(v, "EnemyID"), 0) + 1
+        groups = {}
+        for k, v in rows.items():
+            if uses[g(v, "EnemyID")] > 1:
+                continue
+            for rx, label in OPTIONAL_BOSS_GROUP:
+                m = rx.match(k)
+                if m:
+                    groups.setdefault(label.format(*m.groups()), []).append(g(v, "EnemyID"))
+                    break
+        _COMPLETION_DATA.update(per_area=per_area, groups=groups)
+    return _COMPLETION_DATA["per_area"], _COMPLETION_DATA["groups"]
+
+
+def completion(save_path):
+    """-> dict of counts and the weighted completion share (0..1) of a save."""
+    if save_path in (None, NEW_GAME):
+        return dict(share=0.0, chapters=0, side_stories=0, optional_bosses=0, areas=0)
+    s = gvas.SaveFile.load(save_path)
+    per_area, groups = _completion_data()
+    side = 0
+    for a, grp in enumerate(s.get("SubMissionData").value):
+        states = {q.name.split("_")[0]: q.value for q in grp}["MissionState"]
+        side += sum(1 for x in states[:per_area.get(a, 0)] if x == 2)
+    info = s.get("EnemyInfoData").value
+    fought = lambda i: 0 <= i < len(info) and any(q.value for q in info[i])
+    bosses = sum(1 for ids in groups.values() if any(fought(i) for i in ids))
+    areas = sum(bin(x & 0xffffffff).count("1") for x in s.get("VisitedMap").value)
+    out = dict(chapters=chapters_done(s), side_stories=side, optional_bosses=bosses,
+               areas=areas)
+    totals = dict(chapters=32, side_stories=sum(per_area.values()),
+                  optional_bosses=len(groups), areas=AREA_TOTAL)
+    out["share"] = sum(w * min(1.0, out[k] / totals[k]) for k, w in COMPLETION_WEIGHTS.items())
+    out["totals"] = totals
+    return out
+
+
 # ---- how hard, by stage of the game ---------------------------------------------------
 # The chapter 1s play as vanilla and the preset's full strength builds up through the
 # mid game (user 2026-10-04: harder curves were fun late, not early). RAMP is a list of
@@ -301,6 +382,8 @@ def apply_settings(s):
     PROGRESS_MARGIN = s["progress_margin"]
     PARTY_MARGIN = s["party_margin"]
     LEGACY_FLOOR = s["legacy_floor"]
+    global COMPLETION_FLOOR
+    COMPLETION_FLOOR = s.get("completion_floor", 0.0)
     BOSS_HP_MULT = s["boss_hp_mult"]
     SUPERBOSS_HP_MULT = s["superboss_hp_mult"]
     ENEMY_LEVEL_WEIGHT = s["enemy_level"]
@@ -310,8 +393,9 @@ def apply_settings(s):
     HARD_AREA_DISPLAY = s["hard_area_display"]
 
 
-def world_floor(progress, party_lv):
-    """-> (floor, explanation). With a RAMP, first applies this stage's settings."""
+def world_floor(progress, party_lv, completion_share=None):
+    """-> (floor, explanation). With a RAMP, first applies this stage's settings.
+    completion_share (0..1, see completion()) raises the story side on relentless."""
     global STAGE
     chapters = progress // PROGRESS_PER_QUEST
     why = []
@@ -324,6 +408,12 @@ def world_floor(progress, party_lv):
                    f"{ENEMY_LEVEL_WEIGHT:.0%} of party")
     story = expected_danger(chapters) + PROGRESS_MARGIN
     why.insert(0, f"story {story:.0f} ({chapters} chapters)")
+    if COMPLETION_FLOOR > 0 and completion_share is not None:
+        comp = COMPLETION_TOP * completion_share
+        if comp > story:
+            story += COMPLETION_FLOOR * (comp - story)
+            why.append(f"completion {completion_share:.0%} -> {comp:.0f}"
+                       + (f" x{COMPLETION_FLOOR:g}" if COMPLETION_FLOOR < 1 else ""))
     if LEGACY_FLOOR:
         legacy = BASE_DANGER + PER_QUEST * chapters
         story = max(story, legacy)
@@ -577,7 +667,12 @@ def build(out_path=None, save_path=None, verbose=True, pack=True):
     p = pak.Pak(paths.base_pak())
     save, progress = quests_done(save_path)
     party_lv = party_level(save)
-    floor, why = world_floor(progress, party_lv)
+    global LAST_COMPLETION
+    done = LAST_COMPLETION = completion(save)
+    floor, why = world_floor(progress, party_lv, done["share"])
+    if verbose and COMPLETION_FLOOR > 0:
+        print("completion: " + ", ".join(f"{k.replace('_', ' ')} {done[k]}/{done['totals'][k]}"
+                                         for k in COMPLETION_WEIGHTS) + f" -> {done['share']:.1%}")
     if verbose and SET_ENEMY_LEVEL == "party":
         print(f"party average level {party_lv}: enemy and boss levels raised to at least "
               f"{round(party_lv * ENEMY_LEVEL_WEIGHT)}")
@@ -637,16 +732,17 @@ def build(out_path=None, save_path=None, verbose=True, pack=True):
             struct.pack_into("<i", ue, o, level_to)
             expected.add(o)
 
-    def scale_boss(i, extra_hp=1.0, extra_all=1.0):
+    def scale_boss(i, extra_hp=1.0, extra_all=1.0, to=None):
         """Scale a boss by how far the world has moved past the danger it was built for,
-        per stat; extra_hp always applies (the preset's boss HP bonus)."""
+        per stat; extra_hp always applies (the preset's boss HP bonus). to = a profile to
+        scale to instead of the world's (fixed-danger final boss)."""
         native = profile_at(curve, levels, natives[keys[i]])
         for f in STATS + (REWARDS if SCALE_REWARDS else []):
             o = offs[f][i]
             old = struct.unpack_from("<i", ue, o)[0]
             if old <= 0:
                 continue
-            want = pay[f] if f in REWARDS else target[f]
+            want = to[f] if to else (pay[f] if f in REWARDS else target[f])
             world = max(1.0, want / native[f]) if native.get(f) else 1.0
             mult = world * extra_all * (extra_hp if f == "HP" else 1.0)
             new = max(old, int(old * mult))
@@ -666,7 +762,9 @@ def build(out_path=None, save_path=None, verbose=True, pack=True):
             continue
         if c == "super":
             # superbosses scale only once the world passes the danger they were built for
-            scale_boss(i, extra_hp=SUPERBOSS_HP_MULT, extra_all=SUPERBOSS_EXTRA)
+            fixed = FINAL_BOSS_DANGER and k.startswith(FINAL_BOSS_PREFIX)
+            scale_boss(i, extra_hp=SUPERBOSS_HP_MULT, extra_all=SUPERBOSS_EXTRA,
+                       to=profile_at(curve, levels, FINAL_BOSS_DANGER) if fixed else None)
             touched["superboss"] += 1
             continue
         if c == "boss":

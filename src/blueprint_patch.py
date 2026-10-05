@@ -76,25 +76,90 @@ def patch(ua, ue):
     return bytes(out)
 
 
+# ---- battle money follows the equipment JP bonus (BattleManagerBP) -----------------------
+# CalcGetReward multiplies battle money by (support ratio + MoneyRatioByEquipment - 1), but
+# nothing in the game ever sets MoneyRatioByEquipment (always 1.0); equipment only reaches
+# the EXP and JP ratios. Reading JPRatioByEquipment there instead makes JP-up gear raise
+# money by the same percentage: one same-size reference swap, 1 byte.
+MANAGER = "Octopath_Traveler/Content/Battle/BP/BattleManagerBP"
+REWARD_FUNCTION = "CalcGetReward"
+
+
+def patch_manager(ua, ue):
+    pkg = kismet.Package(ua, ue)
+    fn = pkg.export_index(REWARD_FUNCTION, cls="Function")
+    money = pkg.export_index("MoneyRatioByEquipment", outer="BattleManagerBP_C")
+    jp = pkg.export_index("JPRatioByEquipment", outer="BattleManagerBP_C")
+    off, size, _mem = pkg.script(fn)
+    code = bytearray(ue[off:off + size])
+    tok = _tok(0x01, money)
+    if code.count(tok) != 1:
+        raise RuntimeError(f"{REWARD_FUNCTION}: expected one MoneyRatioByEquipment read")
+    before = [x for _m, x in kismet.disassemble(pkg, fn)]
+    code = bytearray(code.replace(tok, _tok(0x01, jp)))
+    out = bytearray(ue)
+    out[off:off + size] = code
+    after = [x for _m, x in kismet.disassemble(kismet.Package(ua, bytes(out)), fn)]
+    changed = [(a, b) for a, b in zip(before, after) if a != b]
+    if len(before) != len(after) or len(changed) != 1 or "JPRatioByEquipment" not in changed[0][1]:
+        raise RuntimeError(f"{REWARD_FUNCTION}: patch changed {len(changed)} statements")
+    return _jp_not_cumulative(ua, bytes(out))
+
+
+def _jp_not_cumulative(ua, ue):
+    """SetJPRatioByEquipment: JP = Ratio + JP - 1 (every JP item adds up) becomes
+    JP = FMax(Ratio, JP) + 0 - only the strongest JP (and so money) item counts (user
+    2026-10-04: "that effect can't be cumulative"). Swaps the math function and the -1.0."""
+    pkg = kismet.Package(ua, ue)
+    fn = pkg.export_index("SetJPRatioByEquipment", cls="Function")
+    add = next(i for i, x in enumerate(pkg.imports) if x["name"] == "Add_FloatFloat")
+    fmax = next(i for i, x in enumerate(pkg.imports) if x["name"] == "FMax")
+    off, size, _mem = pkg.script(fn)
+    code = bytearray(ue[off:off + size])
+    call_add = b"h" + struct.pack("<i", -(add + 1))
+    minus_one = b"" + struct.pack("<f", -1.0)
+    if code.count(call_add) != 2 or code.count(minus_one) != 1:
+        raise RuntimeError("SetJPRatioByEquipment: not the shipped code")
+    i = code.index(call_add)
+    code[i:i + 5] = b"h" + struct.pack("<i", -(fmax + 1))
+    j = code.index(minus_one)
+    code[j:j + 5] = b"" + struct.pack("<f", 0.0)
+    out = bytearray(ue)
+    out[off:off + size] = code
+    st = [x for _m, x in kismet.disassemble(kismet.Package(ua, bytes(out)), fn)]
+    if not (st[0].startswith("LET local:exp:CallFunc_Add_FloatFloat_ReturnValue = FMax(")
+            and "0.0)" in st[1]):
+        raise RuntimeError(f"SetJPRatioByEquipment patch unexpected: {st[:2]}")
+    return bytes(out)
+
+
+PATCHES = ((ASSET, patch), (MANAGER, patch_manager))
+
+
 def patched_files(base_pak):
-    ua = base_pak.read(ASSET + ".uasset")
-    ue = base_pak.read(ASSET + ".uexp")
-    return {ASSET + ".uasset": ua, ASSET + ".uexp": patch(ua, ue)}
+    out = {}
+    for asset, fn in PATCHES:
+        ua = base_pak.read(asset + ".uasset")
+        ue = base_pak.read(asset + ".uexp")
+        out[asset + ".uasset"], out[asset + ".uexp"] = ua, fn(ua, ue)
+    return out
 
 
 def check(base_pak, mod_pak):
-    """-> list of problems with the patched blueprint in mod_pak (empty = fine)."""
-    ua = base_pak.read(ASSET + ".uasset")
-    ue = base_pak.read(ASSET + ".uexp")
-    if mod_pak.read(ASSET + ".uasset") != ua:
-        return ["BattlePlayerBP.uasset differs from the shipped one"]
-    mod = mod_pak.read(ASSET + ".uexp")
-    if mod != patch(ua, ue):
-        return ["BattlePlayerBP.uexp is not exactly the expected patch"]
-    pkg = kismet.Package(ua, mod)
-    code = "\n".join(s for _m, s in kismet.disassemble(pkg, _refs(pkg)["fn"]))
-    if "EquipmentWeapon)" in code.split("Array_Length", 1)[1].split("\n", 1)[0]:
-        return ["the loop still runs over weapons only"]
+    """-> list of problems with the patched blueprints in mod_pak (empty = fine)."""
+    problems = []
+    for asset, fn in PATCHES:
+        ua = base_pak.read(asset + ".uasset")
+        ue = base_pak.read(asset + ".uexp")
+        name = asset.rsplit("/", 1)[-1]
+        if mod_pak.read(asset + ".uasset") != ua:
+            problems.append(f"{name}.uasset differs from the shipped one")
+        elif mod_pak.read(asset + ".uexp") != fn(ua, ue):
+            problems.append(f"{name}.uexp is not exactly the expected patch")
+    if problems:
+        return problems
+    pkg = kismet.Package(base_pak.read(ASSET + ".uasset"), mod_pak.read(ASSET + ".uexp"))
+    code = "\n".join(x for _m, x in kismet.disassemble(pkg, _refs(pkg)["fn"]))
     if code.count("Equipment[local:exp:Temp_int_Array_Index_Variable]") != 3:
-        return ["elemental boosts are not read from every equipped slot"]
-    return []
+        problems.append("elemental boosts are not read from every equipped slot")
+    return problems

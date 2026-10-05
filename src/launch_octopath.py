@@ -62,7 +62,7 @@ def save_summary(path):
         B.world_floor(0, 1)
         return dict(path=path, slot="New game", saved="", play="", chapters=0,
                     party="(no save yet - start a new game)", party_lv=1, floor=1,
-                    danger="vanilla", progress=0)
+                    danger="vanilla", progress=0, side_all=False)
     s = gvas.SaveFile.load(path)
     progress = B.chapters_done(s) * B.PROGRESS_PER_QUEST
     slot = {x.name.split("_")[0]: x for x in s.get("slotData").value}
@@ -73,7 +73,9 @@ def save_summary(path):
         lv[f["CharacterID"]] = f["Level"]
     party = [f"{rc.CHAR_NAMES.get(c, '?')} {lv.get(c, 0)}" for c in ids if lv.get(c, 0) > 0]
     party_lv = B.party_level(path)
-    floor, _why = B.world_floor(progress, party_lv)
+    done = B.completion(path)
+    floor, _why = B.world_floor(progress, party_lv, done["share"])
+    side_all = done["side_stories"] >= done["totals"]["side_stories"]
     # the opening stage leaves the story's areas as shipped
     danger = "vanilla" if B.RAMP and B.STAGE and B.STAGE[0] <= B.RAMP[0][0] else str(floor)
     secs = getattr(slot.get("PlayTime"), "value", 0) or 0
@@ -83,6 +85,7 @@ def save_summary(path):
                 play=f"{secs // 3600}h{secs // 60 % 60:02d}",
                 chapters=progress // B.PROGRESS_PER_QUEST,
                 party=", ".join(party), party_lv=party_lv, floor=floor, danger=danger,
+                side_all=side_all,
                 progress=progress)
 
 
@@ -230,7 +233,9 @@ def update(save_path, log=print):
     B.SELECTED_SAVE = save_path
     info = save_summary(save_path)
     want = {"save": os.path.normcase(save_path), "progress": info["progress"],
-            "party_level": info["party_lv"], "config": config.fingerprint(cfg),
+            "party_level": info["party_lv"], "floor": info["floor"],
+            "side_all": info["side_all"],
+            "config": config.fingerprint(cfg),
             "source": source_hash()}
     installed = os.path.join(paths.mods_dir(), build_all.OUT_NAME)
     have = {}
@@ -362,11 +367,130 @@ def main(argv):
     if wrap is not None:
         print("starting the game (Steam command) ...")
         sys.stdout.flush()
-        return subprocess.call(wrap)
+        import steam_setup
+        game = subprocess.Popen(wrap)
+        # Octopath_Traveler.exe may hand over to the -Shipping exe; watch whichever is alive
+        watch_world(lambda: game.poll() is None or steam_setup.game_running())
+        return game.wait()
     print("starting the game ...")
     os.startfile(STEAM_URL)
-    time.sleep(2)
+    import steam_setup
+    # wait for Steam to start it, then keep an eye on the saves while it runs
+    for _ in range(60):
+        time.sleep(2)
+        if steam_setup.game_running():
+            watch_world(steam_setup.game_running)
+            break
     return 0
+
+
+# ------------------------------------------------------------------ while you play
+WATCH_SECONDS = 5
+NOTICE_SECONDS = 14
+
+
+def watch_world(running):
+    """While the game runs, recompute the world whenever it saves; if it would grow past the
+    installed one, say so - the world itself only changes at the next launch."""
+    import config
+    try:
+        cfg = config.load()
+        if not cfg.get("world_notice", True):
+            while running():
+                time.sleep(WATCH_SECONDS)
+            return
+        with open(stamp_path(), encoding="utf-8") as f:
+            stamp = json.load(f)
+        shown, laurel = stamp.get("floor"), stamp.get("side_all", False)
+    except Exception:                                    # noqa: BLE001 (nothing to compare)
+        shown, laurel = None, True
+    seen = {p: os.path.getmtime(p) for p in paths.find_saves()}
+    while running():
+        time.sleep(WATCH_SECONDS)
+        try:
+            changed = [p for p in paths.find_saves() if seen.get(p) != os.path.getmtime(p)]
+            for p in changed:
+                seen[p] = os.path.getmtime(p)
+            if not changed or shown is None:
+                continue
+            time.sleep(1)                                # let the game finish writing
+            info = save_summary(max(changed, key=os.path.getmtime))
+            new_laurel = info["side_all"] and not laurel
+            if info["floor"] > shown or new_laurel:
+                print(f"world would grow: danger {shown} -> {info['floor']} ({info['slot']})"
+                      + (", every side story done" if new_laurel else ""))
+                sys.stdout.flush()
+                world_stirs(shown, max(shown, info["floor"]), laurel=new_laurel)
+                shown, laurel = max(shown, info["floor"]), laurel or new_laurel
+        except Exception:                                # noqa: BLE001 (never disturb play)
+            print(traceback.format_exc())
+
+
+def world_stirs(old, new, laurel=False):
+    """A non-intrusive banner over the game, styled after its gold-on-navy menus."""
+    import gc
+    import tkinter as tk
+    import build_all
+    opened = [build_all.TIER_NAME[T] for T in build_all.TIERS
+              if old < T - build_all.LOOKAHEAD <= new]
+    parts = [f"Danger {old}  →  {new}"] if new > old else []
+    if opened:
+        parts.append(" and ".join(opened) + " gear now in Grandport")
+    if laurel:
+        parts.append(f"Every tale is told: the {build_all.LAUREL_NAME} awaits in Grandport")
+    detail = "   ·   ".join(parts)
+    gold, navy, parch = "#d9b45a", "#101a2e", "#efe3c4"
+    try:
+        root = tk.Tk()
+        root.overrideredirect(True)
+        root.attributes("-topmost", True)
+        root.attributes("-alpha", 0.0)
+        root.configure(bg=gold)
+        inner = tk.Frame(root, bg=navy, padx=34, pady=18)
+        inner.pack(padx=2, pady=2)
+        tk.Label(inner, text="✦  The World Stirs  ✦", fg=gold, bg=navy,
+                 font=("Palatino Linotype", 20, "bold")).pack()
+        tk.Frame(inner, bg=gold, height=1, width=520).pack(pady=(8, 10))
+        tk.Label(inner, text="You have gained new power and surmounted new heights.\n"
+                             "The enemies of the land of Orsterra grow with you,\n"
+                             "as do the rewards.",
+                 fg=parch, bg=navy, font=("Palatino Linotype", 14), justify="center").pack()
+        tk.Label(inner, text="Restart the game to update the world.", fg=gold, bg=navy,
+                 font=("Palatino Linotype", 13, "italic")).pack(pady=(10, 4))
+        tk.Label(inner, text=detail, fg="#9aa8c4", bg=navy, font=("Segoe UI", 10)).pack()
+        root.update_idletasks()
+        w, h = root.winfo_reqwidth(), root.winfo_reqheight()
+        root.geometry(f"+{(root.winfo_screenwidth() - w) // 2}+{int(root.winfo_screenheight() * 0.08)}")
+        _no_activate(root)
+        root.bind("<Button-1>", lambda _e: root.destroy())
+        steps = {"n": 0}
+
+        def fade():
+            steps["n"] += 1
+            n, total = steps["n"], NOTICE_SECONDS * 20
+            a = min(1.0, n / 10, (total - n) / 10)
+            if a <= 0:
+                root.destroy()
+                return
+            root.attributes("-alpha", 0.95 * a)
+            root.after(50, fade)
+        root.after(50, fade)
+        root.mainloop()
+    except Exception:                                    # noqa: BLE001 (no display)
+        print(traceback.format_exc())
+    gc.collect()
+
+
+def _no_activate(root):
+    """Show without taking focus from the game (WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW)."""
+    try:
+        import ctypes
+        hwnd = ctypes.windll.user32.GetParent(root.winfo_id())
+        GWL_EXSTYLE, NOACTIVATE, TOOLWINDOW = -20, 0x08000000, 0x00000080
+        style = ctypes.windll.user32.GetWindowLongW(hwnd, GWL_EXSTYLE)
+        ctypes.windll.user32.SetWindowLongW(hwnd, GWL_EXSTYLE, style | NOACTIVATE | TOOLWINDOW)
+    except Exception:                                    # noqa: BLE001
+        pass
 
 
 def explain(exc):

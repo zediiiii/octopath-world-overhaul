@@ -3,6 +3,17 @@
 ## 1.0.0-beta.2 — Orsterra Unbound
 
 - New name: **Orsterra Unbound**.
+- **Relentless grows with completion**: danger = 104 x a weighted share of main chapters
+  (50%), side stories (20%), optional bosses fought (20%) and areas explored (10%); the main
+  story alone ends near the game's own 50. Danger earned this way pays full EXP.
+- **Galdera** is pinned at danger 104 on relentless and drops the **Unbound Crown** (+3000
+  to every stat).
+- **Mythic tier** (danger 104) joins the ladder; Grandport stocks the two newest open tiers.
+- **Wayfarer's Laurel**, sold once every side story is done; **Fortune's Purse** (x3 JP and
+  money). Battle money now follows the equipment JP bonus (1-byte patch), and that bonus
+  takes the best item worn instead of adding up (4-byte patch).
+- **"The World Stirs"**: while you play, a banner says when your progress would grow the
+  world at the next launch (`world_notice`).
 - **Fixed: the launcher could vanish mid-build** after you picked a save (a Python/Tk
   crash when the save picker's leftovers were cleaned up from the build thread). Hard
   crashes now also leave a trace in logs/launcher.log.

@@ -45,12 +45,16 @@ def _app_block(text):
 
 
 def steam_running():
-    out = subprocess.run(["tasklist"], capture_output=True, text=True).stdout.lower()
+    # CREATE_NO_WINDOW: no console flash from the windowless launcher
+    out = subprocess.run(["tasklist"], capture_output=True, text=True,
+                         creationflags=0x08000000).stdout.lower()
     return "steam.exe" in out
 
 
 def game_running():
-    out = subprocess.run(["tasklist"], capture_output=True, text=True).stdout.lower()
+    # CREATE_NO_WINDOW: no console flash from the windowless launcher
+    out = subprocess.run(["tasklist"], capture_output=True, text=True,
+                         creationflags=0x08000000).stdout.lower()
     return "octopath_traveler" in out
 
 

@@ -19,8 +19,9 @@ Design rules (from the user):
     description from the item's real row data and requires an exact match.
 """
 
-TIERS = [60, 70, 80, 90, 99]
-TIER_NAME = {60: "Tempered", 70: "Runeforged", 80: "Astral", 90: "Sovereign", 99: "Eternal"}
+TIERS = [60, 70, 80, 90, 99, 104]
+TIER_NAME = {60: "Tempered", 70: "Runeforged", 80: "Astral", 90: "Sovereign", 99: "Eternal",
+             104: "Mythic"}
 
 # growth of the secondary stats, as a fraction of the major stat
 MINOR1 = {60: 0.30, 70: 0.35, 80: 0.40, 90: 0.45, 99: 0.50}
@@ -268,12 +269,15 @@ def describe(stats, ails, immune=()):
         else:
             attack.append(f"{rate}% chance each: " + "; ".join(DEBUFF_TEXT[n] for n in names)
                           + dur)
+    # JP-up gear also raises battle money by the same amount (blueprint_patch.py)
     if gains.get("EXPUP") is not None and gains.get("EXPUP") == gains.get("JPUP"):
-        equip.append(f"+{gains['EXPUP'] - 100}% EXP and JP for the party")
+        equip.append(f"+{gains['EXPUP'] - 100}% party EXP, JP and money "
+                     f"(JP/money: best one counts)")
     else:
-        for a, label in (("EXPUP", "EXP"), ("JPUP", "JP")):
+        for a, label in (("EXPUP", "party EXP"),
+                         ("JPUP", "party JP and money (best one counts)")):
             if a in gains:
-                equip.append(f"+{gains[a] - 100}% {label} for the party")
+                equip.append(f"+{gains[a] - 100}% {label}")
     # How these combine was read from BattlePlayerBP: each element's boosts are summed over
     # every equipped piece (100% + sum of (value - 100)) and the total multiplies the hit
     # after skills and buffs; resistances sum the same way, down to 0% (immune).
@@ -317,6 +321,42 @@ def describe(stats, ails, immune=()):
 
 
 # ---- the catalogue ---------------------------------------------------------------------
+def _extend_tier(new=104, base=99, prev=90):
+    """Give every per-tier table a value for the Mythic tier (danger 104, past the level cap,
+    for the Gate of Finis): its 90 -> 99 step carried on to 104. Chances stay <= 100 and
+    resistances can't pass full immunity."""
+    capped = {"PROC_CHANCE": 100, "HEX_CHANCE": 100, "GAMBLE_CRIT": 100, "DEATH_CHANCE": 100}
+
+    def grow(d, name=""):
+        if base not in d or new in d:
+            return
+        v = d[base]
+        if not isinstance(v, (int, float)) or isinstance(v, bool):
+            d[new] = v
+            return
+        step = (v - d[prev]) * (new - base) / (base - prev) if prev in d else 0
+        x = v + step
+        if name == "WARD_RESIST":
+            x = max(1, x)
+        if name in capped:
+            x = min(capped[name], x)
+        d[new] = round(x, 3) if isinstance(v, float) else int(round(x))
+
+    def walk(obj, name=""):
+        if isinstance(obj, dict):
+            if obj and all(isinstance(k, int) for k in obj):
+                grow(obj, name)
+        elif isinstance(obj, (list, tuple)):
+            for x in obj:
+                walk(x, name)
+    for name, obj in list(globals().items()):
+        if name.isupper() and name not in ("TIERS", "TIER_NAME"):
+            walk(obj, name)
+
+
+_extend_tier()
+
+
 def design(nums):
     """nums: tier -> dict(weapon_atk, weapon_mult, def_slot, hp_slot, budget, price)."""
     out = []

@@ -305,11 +305,13 @@ def main(pak_path):
     # bosses and superbosses: stats only ever raised, and a superboss's combat stats only
     # once the world floor passes the danger it was built for
     _save, _prog = B.quests_done()
-    world, _why = B.world_floor(_prog, B.party_level(_save))
+    world, _why = B.world_floor(_prog, B.party_level(_save), B.completion(_save)["share"])
     cls0 = B.enemy_classes(base, b_en)
     curve0, levels0 = B.build_curve(b_en, bosses)
     natives = B.boss_natives(base, b_en, cls0, curve0, levels0)
-    early = [k for k in b_en if cls0[k] == "super" and natives[k] >= world and any(
+    pinned = (lambda k: B.FINAL_BOSS_DANGER and k.startswith(B.FINAL_BOSS_PREFIX))
+    early = [k for k in b_en if cls0[k] == "super" and natives[k] >= world and not pinned(k)
+             and any(
         g(g(m_en[k], "Param"), s_) != g(g(b_en[k], "Param"), s_)
         for s_ in ("ATK", "MATK", "DEF", "MDEF", "ACC"))]
     r.check(not early, f"no superboss strengthened before the world (danger {world}) "
@@ -429,8 +431,9 @@ def main(pak_path):
     import blueprint_patch
     if blueprint_patch.ASSET + ".uexp" in present:
         problems = blueprint_patch.check(base, mod)
-        r.check(not problems, "elemental damage boosts count on every equipped piece "
-                              "(BattlePlayerBP: 4 bytes, exactly as planned)",
+        r.check(not problems, "blueprint patches exactly as planned: elemental boosts on "
+                              "every equipped piece (BattlePlayerBP), battle money follows "
+                              "the equipment JP bonus (BattleManagerBP)",
                 "; ".join(problems))
     else:
         import build_all
@@ -475,7 +478,7 @@ def main(pak_path):
     # ---- 6. structural ----------------------------------------------------
     log.info("[6] structure")
     for path in sorted({n[:-len(".uexp")] for n in present if n.endswith(".uexp")}):
-        if path == blueprint_patch.ASSET:
+        if path in (blueprint_patch.ASSET, blueprint_patch.MANAGER):
             continue                            # a blueprint, checked byte-exactly in [5a]
         try:
             dt.verify(mod.read(path + ".uasset"), mod.read(path + ".uexp"))

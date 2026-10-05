@@ -14,18 +14,21 @@ PRESETS = {
     # where the story normally is.
     "classic": dict(progress_margin=0, party_margin=None, legacy_floor=False,
                     boss_hp_mult=1.0, superboss_hp_mult=1.0, enemy_level="vanilla",
-                    hard_area_display=False),
+                    hard_area_display=False, completion_floor=0.0,
+                    final_boss_danger=0),
     # Default. A little above vanilla's own curve, and never below the party's level, so a
     # party that out-levels the story meets enemies that keep up.
     "adaptive": dict(progress_margin=2, party_margin=0, legacy_floor=False,
                      boss_hp_mult=1.25, superboss_hp_mult=1.25, enemy_level="party",
-                     hard_area_display=False),
+                     hard_area_display=False, completion_floor=0.0,
+                     final_boss_danger=0),
     # Adaptive through the mid game, then a step harder for a strong endgame party: enemies
     # at least party level + 4, bosses x2 HP, superbosses x4. (The original 8 + 3 per
     # chapter curve is still available as legacy_floor = true, but it punished the mid game.)
     "relentless": dict(progress_margin=5, party_margin=4, legacy_floor=False,
                        boss_hp_mult=2.0, superboss_hp_mult=4.0, enemy_level="party",
-                       hard_area_display=True),
+                       hard_area_display=True, completion_floor=1.0,
+                       final_boss_danger=104),
 }
 
 # The opening of every preset: the chapter 1s play as vanilla (user 2026-10-04: "keep a more
@@ -33,7 +36,7 @@ PRESETS = {
 # danger behind the story are still raised so old haunts don't become trivial.
 VANILLA_START = dict(progress_margin=-10, party_margin=None, legacy_floor=False,
                      boss_hp_mult=1.0, superboss_hp_mult=1.0, enemy_level="vanilla",
-                     hard_area_display=False)
+                     hard_area_display=False, completion_floor=0.0)
 # Stages (see build_difficulty_mod.stage_of): 12 = chapter 1s done, 30 = into the chapter
 # 3s, 40-50 = chapter 4s and the finale.
 RAMP_START = 12
@@ -49,7 +52,7 @@ def ramp(cfg):
     keys = list(VANILLA_START)
 
     def norm(d):
-        d = {k: d[k] for k in keys}
+        d = {k: d.get(k, 0.0) for k in keys}
         d["enemy_level"] = 1.0 if d["enemy_level"] == "party" else 0.0
         return d
     full = norm(cfg)
@@ -89,6 +92,9 @@ preset = adaptive
 save_choice = ask
 ; seconds before the picker continues with the highlighted save
 ask_timeout = 20
+; While you play, show a banner when your progress would make the world grow (it changes
+; at the next launch).
+world_notice = true
 ; Leave empty to auto-detect.
 game_dir =
 save_dir =
@@ -173,6 +179,7 @@ def load():
                        for k, d in FEATURES.items()}
     cfg["save_choice"] = cp.get("general", "save_choice", fallback="ask").strip().lower()
     cfg["ask_timeout"] = cp.getint("general", "ask_timeout", fallback=20)
+    cfg["world_notice"] = cp.getboolean("general", "world_notice", fallback=True)
     cfg["game_dir"] = cp.get("general", "game_dir", fallback="").strip()
     cfg["save_dir"] = cp.get("general", "save_dir", fallback="").strip()
     cfg["cap_test_charm"] = cp.getboolean("legacy", "cap_test_charm", fallback=False)
@@ -193,6 +200,7 @@ def apply(cfg):
     B.SET_ENEMY_LEVEL = "party" if cfg["enemy_level"] == "party" else False
     B.STEAL_LEVEL_SHIFT = 11 if B.SET_ENEMY_LEVEL else 0
     B.HARD_AREA_DISPLAY = cfg["hard_area_display"]
+    B.FINAL_BOSS_DANGER = int(cfg.get("final_boss_danger", 0) or 0)
     B.REWARD_SHARE = min(1.0, max(0.0, cfg.get("reward_share", 0.5)))
     # the per-stage values above are overwritten at build time from these anchors
     B.RAMP = ramp(cfg)
@@ -216,5 +224,6 @@ def apply(cfg):
 def fingerprint(cfg):
     """Stable string of everything that changes the build (for the launcher's stamp)."""
     import json
-    return json.dumps({k: v for k, v in cfg.items() if k not in ("save_choice", "ask_timeout")},
+    skip = ("save_choice", "ask_timeout", "world_notice")
+    return json.dumps({k: v for k, v in cfg.items() if k not in skip},
                       sort_keys=True)

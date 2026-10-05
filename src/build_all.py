@@ -48,6 +48,28 @@ FAST_TRAVEL = True
 CONSUMABLE_UPGRADES = True
 CAP_TEST_IN_SHOP = False
 
+# The final boss's prize (user 2026-10-04): +3000 to every stat, dropped by Galdera on
+# presets that pin him at a fixed danger. Not sold anywhere.
+CROWN_NAME = "Unbound Crown"
+CROWN_STATS = {k: 3000 for k in ("HP", "MP", "ATK", "DEF", "MATK", "MDEF", "ACC", "EVA",
+                                 "CON", "AGI")}
+CROWN_DROP_ROW = "BOS_Lst_Upp_101"
+# The reward for finishing EVERY side story (user 2026-10-04): sold in Grandport only once
+# the save shows all of them complete.
+LAUREL_NAME = "Wayfarer's Laurel"
+LAUREL_STATS = dict({k: 1500 for k in ("ATK", "DEF", "MATK", "MDEF", "ACC", "EVA", "CON",
+                                       "AGI")}, HP=5000, MP=500)
+LAUREL_EFFECTS = [("ADD_MP_FIXED_REGENERATION", 25), ("ADD_HP_FIXED_REGENERATION", 1000),
+                  ("EXPUP", 200), ("JPUP", 300)]
+LAUREL_PRICE = 500000
+# Money x3 (and JP x3): JP-up gear raises battle money too (blueprint_patch.py). Always sold.
+PURSE_NAME = "Fortune's Purse"
+PURSE_STATS = {"CON": 150, "AGI": 150, "MP": 100}
+PURSE_EFFECTS = [("JPUP", 300)]
+PURSE_PRICE = 150000
+# Grandport stocks the newest tiers the world has opened, not every older one
+SHOP_TIERS = 2
+
 # Tier equipment sells back for half its price (user 2026-10-04), so a piece bought to
 # compare in the Equip menu - the shop's panel can't show every stat - costs half, not 90%.
 # The new consumables keep the 1/10 that stops drop upgrades from being a money farm.
@@ -159,6 +181,26 @@ def main(out_path=None, install=False):
                                        else GEAR_SELL_RATIO))
         info.update(tier=spec["tier"], kind=spec["kind"])
         minted.append(info)
+    if NEW_GEAR:
+        info = forge.forge(catalogue.ACCESSORY_TEMPLATE, LAUREL_NAME,
+                           catalogue.describe(LAUREL_STATS, LAUREL_EFFECTS), LAUREL_STATS,
+                           ailment=LAUREL_EFFECTS, price=LAUREL_PRICE,
+                           sell_ratio=GEAR_SELL_RATIO)
+        info.update(tier=0, kind="reward")
+        minted.append(info)
+        info = forge.forge(catalogue.ACCESSORY_TEMPLATE, PURSE_NAME,
+                           catalogue.describe(PURSE_STATS, PURSE_EFFECTS), PURSE_STATS,
+                           ailment=PURSE_EFFECTS, price=PURSE_PRICE,
+                           sell_ratio=GEAR_SELL_RATIO)
+        info.update(tier=0, kind="special")
+        minted.append(info)
+    if NEW_GEAR and B.FINAL_BOSS_DANGER:
+        info = forge.forge(catalogue.ACCESSORY_TEMPLATE, CROWN_NAME,
+                           catalogue.describe(CROWN_STATS, []), CROWN_STATS, ailment=None,
+                           price=2, sell_ratio=0.5)
+        info.update(tier=0, kind="unique")
+        minted.append(info)
+
     if CAP_TEST_ITEM:
         # TEMPORARY: proves whether the raised stat cap holds in-game. +2000 to both attack
         # stats on an accessory (accessories stack), sold for 1 leaf in the item shop.
@@ -270,6 +312,13 @@ def main(out_path=None, install=False):
                 struct.pack_into("<i", eue, prob_offs[i], BOSS_DROP_RATE)
                 drops += 1
                 boss_drops += 1
+    crown = next((m for m in minted if m["name"] == CROWN_NAME), None)
+    if crown:
+        i = ekeys.index(CROWN_DROP_ROW)
+        dt.set_fname(eue, have_offs[i], anchor_e, crown["row_num"])
+        struct.pack_into("<i", eue, prob_offs[i], 100)
+        print(f"{CROWN_NAME} (+3000 to every stat): dropped by Galdera ({CROWN_DROP_ROW}), "
+              f"fixed at danger {B.FINAL_BOSS_DANGER}")
     print(f"drop tiers open at danger {floor}: {open_tiers or 'none yet (vanilla drops kept)'}")
     print(f"drops: {kept_unique} enemies keep a unique vanilla drop (not sold anywhere)")
     # ---- high-value consumables at danger CONSUMABLE_UPGRADE_FROM+ ----
@@ -328,12 +377,21 @@ def main(out_path=None, install=False):
     # equipment goes to the weapon shop, consumables to the item shop
     # weapons and armour go to the weapon shop; accessories and consumables to the item
     # shop, which keeps each list a manageable length
-    stocked = lambda m: m["tier"] <= floor + SHOP_LOOKAHEAD
+    shop_open = sorted(T for T in TIERS if T <= floor + SHOP_LOOKAHEAD)[-SHOP_TIERS:]
+    stocked = lambda m: m["tier"] in shop_open
+    done = B.LAST_COMPLETION or {}
+    side_all = bool(done.get("totals")) and done["side_stories"] >= done["totals"]["side_stories"]
+    if NEW_GEAR:
+        print(f"{LAUREL_NAME}: " + ("sold in Grandport - every side story is done" if side_all
+              else f"sold once every side story is done ({done.get('side_stories', 0)}/"
+                   f"{(done.get('totals') or {}).get('side_stories', '?')})"))
     plan = [(GRANDPORT_WEAPONS, "Sea_L_A_SHOP_w_01",
              [m for m in minted if m["kind"] in ("weapon", "armour") and stocked(m)]),
             (GRANDPORT_ITEMS, "Sea_L_A_SHOP_i_01",
              [m for m in minted if m["kind"] == "consumable"
-              or (m["kind"] == "test" and CAP_TEST_IN_SHOP)]
+              or (m["kind"] == "test" and CAP_TEST_IN_SHOP)
+              or (m["kind"] == "reward" and side_all)
+              or m["kind"] == "special"]
              + [m for m in minted if m["kind"] == "accessory" and stocked(m)])]
 
     new_purchase = []
