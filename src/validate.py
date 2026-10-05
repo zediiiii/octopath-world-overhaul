@@ -309,7 +309,8 @@ def main(pak_path):
     cls0 = B.enemy_classes(base, b_en)
     curve0, levels0 = B.build_curve(b_en, bosses)
     natives = B.boss_natives(base, b_en, cls0, curve0, levels0)
-    pinned = (lambda k: B.FINAL_BOSS_DANGER and k.startswith(B.FINAL_BOSS_PREFIX))
+    pinned = (lambda k: (B.FINAL_BOSS_DANGER and k.startswith(B.FINAL_BOSS_PREFIX))
+              or (B.REVENANT_MIN_DANGER > world and k.startswith(B.REVENANT_PREFIX)))
     early = [k for k in b_en if cls0[k] == "super" and natives[k] >= world and not pinned(k)
              and any(
         g(g(m_en[k], "Param"), s_) != g(g(b_en[k], "Param"), s_)

@@ -15,20 +15,20 @@ PRESETS = {
     "classic": dict(progress_margin=0, party_margin=None, legacy_floor=False,
                     boss_hp_mult=1.0, superboss_hp_mult=1.0, enemy_level="vanilla",
                     hard_area_display=False, completion_floor=0.0,
-                    final_boss_danger=0),
+                    final_boss_danger=0, revenant_min_danger=0),
     # Default. A little above vanilla's own curve, and never below the party's level, so a
     # party that out-levels the story meets enemies that keep up.
     "adaptive": dict(progress_margin=2, party_margin=0, legacy_floor=False,
                      boss_hp_mult=1.25, superboss_hp_mult=1.25, enemy_level="party",
                      hard_area_display=False, completion_floor=0.0,
-                     final_boss_danger=0),
+                     final_boss_danger=0, revenant_min_danger=0),
     # Adaptive through the mid game, then a step harder for a strong endgame party: enemies
     # at least party level + 4, bosses x2 HP, superbosses x4. (The original 8 + 3 per
     # chapter curve is still available as legacy_floor = true, but it punished the mid game.)
     "relentless": dict(progress_margin=5, party_margin=4, legacy_floor=False,
                        boss_hp_mult=2.0, superboss_hp_mult=4.0, enemy_level="party",
                        hard_area_display=True, completion_floor=1.0,
-                       final_boss_danger=104),
+                       final_boss_danger=104, revenant_min_danger=94),
 }
 
 # The opening of every preset: the chapter 1s play as vanilla (user 2026-10-04: "keep a more
@@ -201,6 +201,7 @@ def apply(cfg):
     B.STEAL_LEVEL_SHIFT = 11 if B.SET_ENEMY_LEVEL else 0
     B.HARD_AREA_DISPLAY = cfg["hard_area_display"]
     B.FINAL_BOSS_DANGER = int(cfg.get("final_boss_danger", 0) or 0)
+    B.REVENANT_MIN_DANGER = int(cfg.get("revenant_min_danger", 0) or 0)
     B.REWARD_SHARE = min(1.0, max(0.0, cfg.get("reward_share", 0.5)))
     # the per-stage values above are overwritten at build time from these anchors
     B.RAMP = ramp(cfg)

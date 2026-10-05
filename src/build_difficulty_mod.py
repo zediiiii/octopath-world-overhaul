@@ -274,6 +274,10 @@ OPTIONAL_BOSS_GROUP = (
 # config) instead of the world's, so there is always a peak to work toward.
 FINAL_BOSS_PREFIX = "BOS_Lst_"
 FINAL_BOSS_DANGER = 0     # 0 = scale with the world like the other superbosses
+# The eight revived chapter-4 bosses of the Gate of Finis ("Darius?" ...) are fought at
+# this danger or the world's, whichever is higher (user 2026-10-04: "at least at 94").
+REVENANT_PREFIX = "BOS_Ext_Rev_"
+REVENANT_MIN_DANGER = 0
 _COMPLETION_DATA = {}
 LAST_COMPLETION = None    # completion() of the save the last build() was made for
 
@@ -762,9 +766,13 @@ def build(out_path=None, save_path=None, verbose=True, pack=True):
             continue
         if c == "super":
             # superbosses scale only once the world passes the danger they were built for
-            fixed = FINAL_BOSS_DANGER and k.startswith(FINAL_BOSS_PREFIX)
+            pin = None
+            if FINAL_BOSS_DANGER and k.startswith(FINAL_BOSS_PREFIX):
+                pin = FINAL_BOSS_DANGER
+            elif REVENANT_MIN_DANGER > floor and k.startswith(REVENANT_PREFIX):
+                pin = REVENANT_MIN_DANGER
             scale_boss(i, extra_hp=SUPERBOSS_HP_MULT, extra_all=SUPERBOSS_EXTRA,
-                       to=profile_at(curve, levels, FINAL_BOSS_DANGER) if fixed else None)
+                       to=profile_at(curve, levels, pin) if pin else None)
             touched["superboss"] += 1
             continue
         if c == "boss":

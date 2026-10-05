@@ -7,7 +7,8 @@
   (50%), side stories (20%), optional bosses fought (20%) and areas explored (10%); the main
   story alone ends near the game's own 50. Danger earned this way pays full EXP.
 - **Galdera** is pinned at danger 104 on relentless and drops the **Unbound Crown** (+3000
-  to every stat).
+  to every stat). The eight revived bosses of the Gate of Finis fight at danger 94 or the
+  world's, whichever is higher.
 - **Mythic tier** (danger 104) joins the ladder; Grandport stocks the two newest open tiers.
 - **Wayfarer's Laurel**, sold once every side story is done; **Fortune's Purse** (x3 JP and
   money). Battle money now follows the equipment JP bonus (1-byte patch), and that bonus
