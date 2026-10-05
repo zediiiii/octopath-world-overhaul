@@ -185,6 +185,14 @@ EQUIP_FIELDS = [
 
 STATS = ["HP", "ATK", "MATK", "DEF", "MDEF", "ACC"]
 REWARDS = ["Exp", "JobPoint", "Money", "StealMoney"]
+# EXP and JP only follow the PARTY part of the floor halfway. Enemies that keep up with an
+# out-levelled party must not also pay at-level EXP, or the party levels every ~6 fights no
+# matter how far ahead of the story it is (vanilla slows that to 12-25+ fights once 10-20
+# levels ahead) - a runaway the user hit (level 30 in chapter 2). Money pays in full so the
+# gear economy holds. 1.0 = old behaviour, 0.0 = growth rewards follow the story only.
+GROWTH_REWARDS = ["Exp", "JobPoint"]
+REWARD_SHARE = 0.5
+STORY_FLOOR = 1           # the floor without the party part, set by world_floor()
 SUPERBOSS_PREFIXES = ("BOS_Lst_", "BOS_Ext_", "EVE_EXT_")
 
 ENEMY = "Octopath_Traveler/Content/Character/Database/EnemyDB"
@@ -319,6 +327,8 @@ def world_floor(progress, party_lv):
     if PARTY_MARGIN is not None:
         why.append(f"party {party_lv}{PARTY_MARGIN:+g}")
     raw = max(story, party)
+    global STORY_FLOOR
+    STORY_FLOOR = max(1, min(MAX_DANGER, story))
     # The opening stage asks for less than danger 1, the lowest there is: no floor at all,
     # rather than raising the weakest starting-area enemies to danger 1's median.
     global FLOOR_ACTIVE
@@ -558,10 +568,19 @@ def build(out_path=None, save_path=None, verbose=True, pack=True):
     bosses, supers = boss_sets(p)
     curve, levels = build_curve(rows, bosses)
     target = profile_at(curve, levels, floor)
+    # what enemies PAY: money at the floor, EXP / JP only part of the way past the story
+    reward_floor = floor
+    if floor > STORY_FLOOR:
+        reward_floor = int(round(STORY_FLOOR + REWARD_SHARE * (floor - STORY_FLOOR)))
+    pay = dict(target)
+    growth = profile_at(curve, levels, reward_floor)
+    for f in GROWTH_REWARDS:
+        pay[f] = growth[f]
     if verbose:
         print(f"target profile @ danger {floor}: " +
               ", ".join(f"{k}={target[k]}" for k in STATS))
-        print(f"               rewards: " + ", ".join(f"{k}={target[k]}" for k in REWARDS))
+        print(f"               rewards: " + ", ".join(f"{k}={pay[k]}" for k in REWARDS)
+              + (f" (EXP/JP as at danger {reward_floor})" if reward_floor != floor else ""))
 
     fields = STATS + REWARDS + (["EnemyLevel"] if SET_ENEMY_LEVEL else [])
     offs = {f: int_offsets(ua, bytes(ue), f, expect=len(rows)) for f in fields}
@@ -602,7 +621,8 @@ def build(out_path=None, save_path=None, verbose=True, pack=True):
             old = struct.unpack_from("<i", ue, o)[0]
             if old <= 0:
                 continue
-            world = max(1.0, target[f] / native[f]) if native.get(f) else 1.0
+            want = pay[f] if f in REWARDS else target[f]
+            world = max(1.0, want / native[f]) if native.get(f) else 1.0
             mult = world * extra_all * (extra_hp if f == "HP" else 1.0)
             new = max(old, int(old * mult))
             if new != old:
@@ -654,7 +674,7 @@ def build(out_path=None, save_path=None, verbose=True, pack=True):
                 old = struct.unpack_from("<i", ue, o)[0]
                 if old <= 0:
                     continue
-                new = max(old, target[f])
+                new = max(old, pay[f])
                 if new != old:
                     struct.pack_into("<i", ue, o, new)
                     expected.add(o)

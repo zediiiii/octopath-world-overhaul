@@ -138,6 +138,10 @@ seems to happen, give it a moment — the progress window may be on another moni
 **Steam Deck / Linux / Game Pass?** Windows and the Steam version only. (The Game Pass
 version stores its files differently.)
 
+**Will I out-level everything?** Enemies keep up with your party, but the EXP and JP they
+pay only follow half of your lead over the story, so leveling far ahead slows down like it
+does in vanilla. `reward_share` in `overhaul.ini` changes that (1.0 = full EXP).
+
 **Does the world change while I play?** The numbers are fixed for a session; the next
 launch recalculates them from your save. Restart the game after a big story jump if you
 want the world to catch up straight away.

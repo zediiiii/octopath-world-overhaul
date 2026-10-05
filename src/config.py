@@ -114,6 +114,10 @@ progress_margin =
 party_margin =
 boss_hp_mult =
 superboss_hp_mult =
+; How much of the party-driven part of the world EXP and JP follow (0..1, default 0.5).
+; Enemies always keep up with your party; at 1.0 they also pay full at-level EXP, so an
+; out-levelled party never slows down. Money always pays in full.
+reward_share =
 ; party or vanilla
 enemy_level =
 max_danger =
@@ -189,6 +193,7 @@ def apply(cfg):
     B.SET_ENEMY_LEVEL = "party" if cfg["enemy_level"] == "party" else False
     B.STEAL_LEVEL_SHIFT = 11 if B.SET_ENEMY_LEVEL else 0
     B.HARD_AREA_DISPLAY = cfg["hard_area_display"]
+    B.REWARD_SHARE = min(1.0, max(0.0, cfg.get("reward_share", 0.5)))
     # the per-stage values above are overwritten at build time from these anchors
     B.RAMP = ramp(cfg)
     if "max_danger" in cfg:

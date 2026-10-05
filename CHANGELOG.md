@@ -3,6 +3,10 @@
 ## 1.0.0-beta.2 — Orsterra Unbound
 
 - New name: **Orsterra Unbound**.
+- **Leveling no longer runs away.** Enemies keep up with an out-levelled party, but their
+  EXP and JP now follow only half of that lead (money still pays in full). Before, a party
+  gained a level every ~6 fights however far ahead of the story it was; now being 20
+  levels ahead takes about twice as long, as in vanilla. `reward_share` in overhaul.ini.
 - Launcher: **New game** in the save picker (and automatically when there are no saves),
   so a fresh start gets a fresh world. If anything goes wrong before the game starts, you
   get a message saying why and the game still starts. `overhaul.ini` saved by Notepad with a
