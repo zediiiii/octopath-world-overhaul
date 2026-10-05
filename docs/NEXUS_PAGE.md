@@ -76,8 +76,19 @@ From then on, just press Play. The world is rebuilt from your save whenever your
 
 [b]Uninstall:[/b] run OctopathWorldOverhaul.exe --uninstall, then delete the folder.
 
+[size=5][b]Requirements & credits[/b][/size]
+[b]Requirements: none.[/b] Everything is built from your own game install; no other mod is needed.
+
+Thanks to these mods — Orsterra Unbound is built to work alongside them:
+[list]
+[*][url=https://www.nexusmods.com/octopathtraveler/mods/16]Better Descriptions[/url] — the new items' descriptions follow its wording conventions, and its text is kept: new item text is added on top of it.
+[*][url=https://www.nexusmods.com/octopathtraveler/mods/21]Side Stories Helper[/url] — its text is kept the same way.
+[*][url=https://www.nexusmods.com/octopathtraveler/mods/22]Larger Monster Roster[/url] — H'aanit's larger capture roster is kept: catch-up leveling is built on top of its table.
+[*][url=https://www.nexusmods.com/octopathtraveler/mods/41]Long Distance Banter[/url], [url=https://www.nexusmods.com/octopathtraveler/mods/58]Our Purple Chests[/url], [url=https://www.nexusmods.com/octopathtraveler/mods/56]Toggle Dash[/url] — tested together, no overlap.
+[/list]
+
 [size=5][b]Compatibility[/b][/size]
-Steam version on Windows (not Game Pass, not Steam Deck/Linux). Works with Better Descriptions, Side Stories Helper and other text mods (their text is kept). Conflicts with mods that replace EnemyDB, ItemDB, ShopList, EncountVolumeData, BattlePlayerBP or BattleManagerBP — this one loads last and wins. New item text is English in every language.
+Steam version on Windows (not Game Pass, not Steam Deck/Linux). Other text mods keep their text too. Conflicts with mods that replace EnemyDB, ItemDB, ShopList, EncountVolumeData, BattlePlayerBP or BattleManagerBP — this one loads last and wins. New item text is English in every language.
 
 [size=5][b]Good to know[/b][/size]
 [list]

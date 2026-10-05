@@ -1051,8 +1051,12 @@ def build(out_path=None, save_path=None, verbose=True, pack=True):
     # ---------------- catch-up leveling (CharacterGrowData) ----------------
     files_grow = {}
     if CATCHUP_LEVELING:
-        gua = p.read(GROW + ".uasset")
-        gue = bytearray(p.read(GROW + ".uexp"))
+        # Built on the copy the game would otherwise load: Larger Monster Roster, for one,
+        # raises H'aanit's capture limit (FCParameter.TameCount) in this same table.
+        gua, gue_in, grow_src = paths.installed_asset(GROW, p)
+        gue = bytearray(gue_in)
+        if verbose and grow_src != "base game":
+            print(f"catch-up leveling: built on {grow_src}'s CharacterGrowData (its changes kept)")
         grow = uasset.read_datatable(gua, bytes(gue))
         gkeys = list(grow)
         tot_offs = int_offsets(gua, bytes(gue), "TotalExp", expect=len(grow))
@@ -1080,7 +1084,7 @@ def build(out_path=None, save_path=None, verbose=True, pack=True):
                 if nx != struct.unpack_from("<i", gue, nxt_offs[i])[0]:
                     struct.pack_into("<i", gue, nxt_offs[i], nx)
                     gexp.add(nxt_offs[i])
-        origg = p.read(GROW + ".uexp")
+        origg = gue_in
         diffg = {i for i in range(len(origg)) if origg[i] != gue[i]}
         assert not diffg - {o + d for o in gexp for d in range(4)}, "stray CharacterGrowData bytes"
         assert list(uasset.read_datatable(gua, bytes(gue))) == gkeys

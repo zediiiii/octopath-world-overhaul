@@ -3,6 +3,9 @@
 ## 1.0.0-beta.2 — Orsterra Unbound
 
 - New name: **Orsterra Unbound**.
+- **Fixed: Larger Monster Roster's 10-beast limit was reset to 6** by catch-up leveling's
+  copy of CharacterGrowData; it is now built on top of whatever copy is installed. The build
+  log names other mods that replace the same files. Requirements & credits section added.
 - **Relentless grows with completion**: danger = 104 x a weighted share of main chapters
   (50%), side stories (20%), optional bosses fought (20%) and areas explored (10%); the main
   story alone ends near the game's own 50. Danger earned this way pays full EXP.

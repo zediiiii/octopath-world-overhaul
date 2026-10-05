@@ -121,6 +121,25 @@ stage of the game.
 
 ![The difficulty curve](docs/images/curve.png)
 
+## Requirements & credits
+
+**Requirements: none** — everything is built from your own game install.
+
+Built to work alongside, with thanks:
+- [Better Descriptions](https://www.nexusmods.com/octopathtraveler/mods/16) — the new items'
+  descriptions follow its wording conventions, and its text is kept (new text is added on
+  top of it).
+- [Side Stories Helper](https://www.nexusmods.com/octopathtraveler/mods/21) — text kept.
+- [Larger Monster Roster](https://www.nexusmods.com/octopathtraveler/mods/22) — H'aanit's
+  larger roster is kept: catch-up leveling is built on top of its `CharacterGrowData`.
+- [Long Distance Banter](https://www.nexusmods.com/octopathtraveler/mods/41),
+  [Our Purple Chests](https://www.nexusmods.com/octopathtraveler/mods/58),
+  [Toggle Dash](https://www.nexusmods.com/octopathtraveler/mods/56) — no overlap.
+
+The build log names any other installed mod that replaces a file this overhaul also
+replaces (this one loads last and wins, except for the text tables and
+`CharacterGrowData`, which it builds on top of).
+
 ## FAQ
 
 **We share a PC / Steam account — does it work for two players?** Yes. The launcher asks

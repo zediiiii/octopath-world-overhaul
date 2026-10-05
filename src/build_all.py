@@ -248,6 +248,18 @@ def main(out_path=None, install=False):
         files.update(ft)
         print("fast travel enabled for every visited location")
 
+    # ---- other installed mods replacing the same files ----
+    # Text tables and CharacterGrowData are built ON TOP of other mods' copies; for anything
+    # else this pak (loading last) wins, so name the overlap in the log.
+    merged = {make_gear.TEXT, B.GROW}
+    for path, (mod, _q) in sorted(paths.other_mod_files().items()):
+        stem = path.rsplit(".", 1)[0]
+        if stem in merged or "/GameText/" in path or not path.endswith(".uexp"):
+            continue
+        if path in files:
+            print(f"note: {mod} also replaces {stem.rsplit('/', 1)[-1]}; "
+                  f"this overhaul's version is the one the game uses")
+
     # ---- rare drops: tougher monsters carry better tiers ----
     eua = files[B.ENEMY + ".uasset"]
     eue = bytearray(files[B.ENEMY + ".uexp"])

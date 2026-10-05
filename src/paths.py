@@ -162,3 +162,44 @@ def steam_userdata_configs():
     if not sd:
         return []
     return glob.glob(os.path.join(sd, "userdata", "*", "config", "localconfig.vdf"))
+
+
+# ------------------------------------------------------------------ other installed mods
+OUR_PREFIX = "ZZ_"
+
+
+def other_mod_files():
+    """{asset path (with extension, from Octopath_Traveler/...): (pak file name, pak)} for
+    every file another mod in ~mods replaces; the last pak in mount order wins, as in game."""
+    import pak
+    out = {}
+    for f in sorted(glob.glob(os.path.join(mods_dir(), "*.pak"))):
+        name = os.path.basename(f)
+        if name.startswith(OUR_PREFIX):
+            continue
+        try:
+            q = pak.Pak(f)
+        except Exception:                               # noqa: BLE001 (not our problem)
+            continue
+        root = q.mount.replace("\\", "/")
+        while root.startswith("../"):
+            root = root[3:]
+        for e in q.entries:
+            out[(root + e).replace("//", "/")] = (name, q)
+    return out
+
+
+def installed_asset(asset, base):
+    """(uasset, uexp, source) of `asset` as the game would load it before our pak: another
+    mod's copy if one replaces it, else the base game's. A mod may ship only the .uexp."""
+    mods = other_mod_files()
+    parts, source = {}, "base game"
+    for ext in (".uasset", ".uexp"):
+        hit = mods.get(asset + ext)
+        if hit:
+            parts[ext] = hit[1].read(next(e for e in hit[1].entries
+                                          if (asset + ext).endswith(e)))
+            source = hit[0]
+        else:
+            parts[ext] = base.read(asset + ext)
+    return parts[".uasset"], parts[".uexp"], source
