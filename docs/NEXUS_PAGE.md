@@ -2,7 +2,7 @@
 
 **Name:** Orsterra Unbound - World Overhaul
 **Category:** Overhauls
-**Version:** 1.0.0-beta.2
+**Version:** 1.0.0-beta.3
 **Short description (350 chars max):** Vanilla chapter 1s, then a world that keeps up: enemies
 and bosses scale with your story and party, 560+ new multi-stat items up to level 104, stats past
 999, elemental boosts that work on accessories, fast travel to visited places, half the random
