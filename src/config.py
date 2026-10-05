@@ -93,7 +93,8 @@ save_choice = ask
 ; seconds before the picker continues with the highlighted save
 ask_timeout = 20
 ; While you play, show a banner when your progress would make the world grow (it changes
-; at the next launch).
+; at the next launch). Set the game to borderless fullscreen to see it over the game:
+; nothing can draw over exclusive fullscreen.
 world_notice = true
 ; Leave empty to auto-detect.
 game_dir =

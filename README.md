@@ -135,6 +135,13 @@ a message saying why and the game starts with the previous build. Details are in
 folder next to the exe. A rebuild takes about 15 seconds; if you click Play and nothing
 seems to happen, give it a moment — the progress window may be on another monitor.
 
+**Play in borderless fullscreen** (the game's display settings). While you play, the
+launcher shows a "The World Stirs" banner when your progress would grow the world. In
+exclusive fullscreen the game takes over the screen and no other window can appear on top,
+so the banner only shows when you Alt-Tab. Borderless looks the same, switches faster, and
+also avoids a display-mode crash some streaming or virtual-display setups hit in exclusive
+fullscreen.
+
 **Steam Deck / Linux / Game Pass?** Windows and the Steam version only. (The Game Pass
 version stores its files differently.)
 

@@ -78,6 +78,7 @@ Steam version on Windows (not Game Pass, not Steam Deck/Linux). Works with Bette
 
 [size=5][b]Good to know[/b][/size]
 [list]
+[*][b]Play in borderless fullscreen.[/b] The launcher shows a banner while you play when your progress would grow the world; in exclusive fullscreen nothing can appear over the game, so you'd only see it after Alt-Tab. Borderless also avoids a display crash on some streaming / virtual-display setups.
 [*]No game files are included: the mod is built on your PC from your own installation.
 [*]Your saves are only read, never written.
 [*]The exe is a packaged Python program (PyInstaller); some antivirus tools flag those by habit.
