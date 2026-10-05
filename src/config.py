@@ -74,6 +74,7 @@ FEATURES = {
     "scale_summons": True,        # H'aanit's captured beasts keep pace
     "scale_tressa_collect": True,
     "consumable_upgrades": True,  # high-value consumable drops / steals late game
+    "toggle_dash": False,         # dash button toggles running instead of hold-to-run
 }
 
 DEFAULT_INI = """\
@@ -111,6 +112,8 @@ catch_up_leveling = true
 scale_summons = true
 scale_tressa_collect = true
 consumable_upgrades = true
+; press dash once to run, again to walk (instead of holding the button)
+toggle_dash = false
 
 [tuning]
 ; true = the chapter 1s play as vanilla and the preset's values below build up through
@@ -219,6 +222,7 @@ def apply(cfg):
     build_all.NEW_GEAR = f["new_gear"]
     build_all.FAST_TRAVEL = f["fast_travel"]
     build_all.CONSUMABLE_UPGRADES = f["consumable_upgrades"]
+    build_all.TOGGLE_DASH = f["toggle_dash"]
     build_all.CAP_TEST_ITEM = cfg["cap_test_charm"]
     return cfg
 

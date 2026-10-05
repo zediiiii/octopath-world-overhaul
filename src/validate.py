@@ -441,6 +441,16 @@ def main(pak_path):
         if build_all.NEW_GEAR:
             r.check(False, "", "BattlePlayerBP patch missing: Sigils and Hearts do nothing")
 
+    if blueprint_patch.ACTION + ".uexp" in present:
+        try:
+            good = (mod.read(blueprint_patch.ACTION + ".uexp")
+                    == blueprint_patch.dash_toggle_files(base)[blueprint_patch.ACTION + ".uexp"])
+        except Exception as exc:                   # noqa: BLE001
+            good = False
+            log.info("  dash toggle check failed: %s", exc)
+        r.check(good, "dash toggle patch exactly as planned (ActionController_Impl)",
+                "ActionController_Impl differs from the planned dash-toggle patch")
+
     # ---- 5b. battle tunables: only Tressa's Collect amounts, and only upward ----
     BP = B.BATTLE_PARAMS
     if BP + ".uexp" in present:
@@ -479,7 +489,7 @@ def main(pak_path):
     # ---- 6. structural ----------------------------------------------------
     log.info("[6] structure")
     for path in sorted({n[:-len(".uexp")] for n in present if n.endswith(".uexp")}):
-        if path in (blueprint_patch.ASSET, blueprint_patch.MANAGER):
+        if path in (blueprint_patch.ASSET, blueprint_patch.MANAGER, blueprint_patch.ACTION):
             continue                            # a blueprint, checked byte-exactly in [5a]
         try:
             dt.verify(mod.read(path + ".uasset"), mod.read(path + ".uexp"))

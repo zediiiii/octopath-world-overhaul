@@ -87,6 +87,10 @@ delete the folder and the desktop shortcut. Your saves were never touched.
 ![The gear ladder](docs/images/gear.png)
 
 ### Quality of life
+
+- **Toggle dash** (optional, `toggle_dash = true` in `overhaul.ini`): press the dash button
+  once to run and again to walk, instead of holding it. A small patch to the game's own
+  controller; no script loader needed.
 - **Fast travel to every location you have visited** (dungeons, caves, shrines — not just
   towns). Places you've never been stay locked.
 - **Fewer random encounters**: Evasive Maneuvers is built in, so you get the support-skill
@@ -132,9 +136,8 @@ Built to work alongside, with thanks:
 - [Side Stories Helper](https://www.nexusmods.com/octopathtraveler/mods/21) — text kept.
 - [Larger Monster Roster](https://www.nexusmods.com/octopathtraveler/mods/22) — H'aanit's
   larger roster is kept: catch-up leveling is built on top of its `CharacterGrowData`.
-- [Long Distance Banter](https://www.nexusmods.com/octopathtraveler/mods/41),
-  [Our Purple Chests](https://www.nexusmods.com/octopathtraveler/mods/58),
-  [Toggle Dash](https://www.nexusmods.com/octopathtraveler/mods/56) — no overlap.
+- [Long Distance Banter](https://www.nexusmods.com/octopathtraveler/mods/41) and
+  [Our Purple Chests](https://www.nexusmods.com/octopathtraveler/mods/58) — no overlap.
 
 The build log names any other installed mod that replaces a file this overhaul also
 replaces (this one loads last and wins, except for the text tables and

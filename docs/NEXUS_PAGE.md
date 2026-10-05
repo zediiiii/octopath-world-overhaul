@@ -55,6 +55,7 @@ The whole journey stays a real fight — from the first chapter to the last boss
 [list]
 [*]Fast travel to every location you've visited (unvisited places stay locked).
 [*]Evasive Maneuvers built in — half the random encounters, one support-skill slot freed.
+[*][b]Toggle dash[/b] (optional, toggle_dash = true): press dash once to run, again to walk. A small patch to the game's own controller — no script loader needed.
 [*]Catch-up leveling: travelers far behind your party get their early levels up to 5× cheaper (the last few levels before they catch up cost the usual total).
 [/list]
 
@@ -84,11 +85,11 @@ Thanks to these mods — Orsterra Unbound is built to work alongside them:
 [*][url=https://www.nexusmods.com/octopathtraveler/mods/16]Better Descriptions[/url] — the new items' descriptions follow its wording conventions, and its text is kept: new item text is added on top of it.
 [*][url=https://www.nexusmods.com/octopathtraveler/mods/21]Side Stories Helper[/url] — its text is kept the same way.
 [*][url=https://www.nexusmods.com/octopathtraveler/mods/22]Larger Monster Roster[/url] — H'aanit's larger capture roster is kept: catch-up leveling is built on top of its table.
-[*][url=https://www.nexusmods.com/octopathtraveler/mods/41]Long Distance Banter[/url], [url=https://www.nexusmods.com/octopathtraveler/mods/58]Our Purple Chests[/url], [url=https://www.nexusmods.com/octopathtraveler/mods/56]Toggle Dash[/url] — tested together, no overlap.
+[*][url=https://www.nexusmods.com/octopathtraveler/mods/41]Long Distance Banter[/url] and [url=https://www.nexusmods.com/octopathtraveler/mods/58]Our Purple Chests[/url] — tested together, no overlap.
 [/list]
 
 [size=5][b]Compatibility[/b][/size]
-Steam version on Windows (not Game Pass, not Steam Deck/Linux). Other text mods keep their text too. Conflicts with mods that replace EnemyDB, ItemDB, ShopList, EncountVolumeData, BattlePlayerBP or BattleManagerBP — this one loads last and wins. New item text is English in every language.
+Steam version on Windows (not Game Pass, not Steam Deck/Linux). Other text mods keep their text too. Conflicts with mods that replace EnemyDB, ItemDB, ShopList, EncountVolumeData, BattlePlayerBP, BattleManagerBP or (with toggle dash) ActionController_Impl — this one loads last and wins. New item text is English in every language.
 
 [size=5][b]Good to know[/b][/size]
 [list]

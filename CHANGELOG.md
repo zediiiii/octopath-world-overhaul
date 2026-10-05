@@ -6,6 +6,7 @@
   copy of CharacterGrowData; it is now built on top of whatever copy is installed. The build
   log names other mods that replace the same files.
 - Requirements & credits section (README / Nexus page).
+- **Toggle dash** option (`toggle_dash`): press dash once to run, again to walk.
 
 ## 1.0.0-beta.2 — Orsterra Unbound
 

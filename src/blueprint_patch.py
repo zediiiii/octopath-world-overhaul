@@ -163,3 +163,123 @@ def check(base_pak, mod_pak):
     if code.count("Equipment[local:exp:Temp_int_Array_Index_Variable]") != 3:
         problems.append("elemental boosts are not read from every equipped slot")
     return problems
+
+
+# ---- optional: dash button toggles instead of hold (ActionController_Impl) ---------------
+# OnActionDash(Press) runs, via the event graph, "if player input: SetPlayerDash(Press)",
+# so dash only lasts while the button is held. The event's entry jump is pointed at a new
+# block appended after the graph's last instruction (nothing existing moves):
+#     OnIsPlayerInput(ok); if not ok: the original "SetPlayerDash(false)" path
+#     if not Press: return                      (release does nothing)
+#     tmp = GetPlayerDash(self); tmp = !tmp; SetPlayerDash(self, tmp); return
+# tmp reuses an event-graph bool (CallFunc_Not_PreBool_ReturnValue) whose other use is a
+# self-contained two-statement sequence. Every byte sequence copies the graph's own encoding.
+ACTION = "Octopath_Traveler/Content/Character/BP/ActionController_Impl"
+
+
+def _u32(v):
+    return struct.pack("<I", v)
+
+
+def patch_dash_toggle(ua, ue):
+    import datatable as dt
+    pkg = kismet.Package(ua, ue)
+    fn = pkg.export_index("ExecuteUbergraph_ActionController_Impl", cls="Function")
+    imp = {x["name"]: -(i + 1) for i, x in enumerate(pkg.imports)}
+    loc = {n: pkg.export_index(n, outer="ExecuteUbergraph_ActionController_Impl")
+           for n in ("K2Node_Event_Press", "CallFunc_OnIsPlayerInput_IsPlayerInput2",
+                     "CallFunc_Not_PreBool_ReturnValue")}
+    off, size, mem = pkg.script(fn)
+    code = ue[off:off + size]
+    st = {m: s for m, s in kismet.disassemble(pkg, fn)}
+    # the shipped shape this patch is written against
+    expect = {3808: "JUMP 2465", 3813: "RETURN nothing",
+              2502: "obj:imp:Default__KSGameStatics.SetPlayerDash(self, local:exp:K2Node_Event_Press)"}
+    for m, s in expect.items():
+        if st.get(m) != s:
+            raise RuntimeError(f"ActionController_Impl: unexpected code at {m}: {st.get(m)}")
+    if not st.get(2488, "").startswith("JUMPIFNOT 2549 ("):
+        raise RuntimeError("ActionController_Impl: player-input check not where expected")
+    i32 = lambda v: struct.pack("<i", v)
+    ctx = b"\x19\x20" + i32(imp["Default__KSGameStatics"])
+    tmp = b"\x00" + i32(loc["CallFunc_Not_PreBool_ReturnValue"])
+    block = (
+        b"\x1b" + code[code.index(b"\x1b"):][1:9]            # OnIsPlayerInput (FName copied)
+        if False else b"")
+    # copy the two shipped statements at 2465 / 2488 verbatim
+    d = kismet.Disassembler(pkg, code)
+    spans = {}
+    while d.p < size:
+        m, p0 = d.mem, d.p
+        s = d.expr()
+        spans[m] = code[p0:d.p]
+        if s == "END":
+            break
+    block = (spans[2465]                                                   # OnIsPlayerInput
+             + spans[2488]                                                 # -> 2549 if not
+             + b"\x07" + _u32(3813) + b"\x00" + i32(loc["K2Node_Event_Press"])   # release: return
+             + b"\x14" + tmp + ctx + _u32(11) + i32(loc["CallFunc_Not_PreBool_ReturnValue"])
+             + b"\x1c" + i32(imp["GetPlayerDash"]) + b"\x17\x16"           # tmp = GetPlayerDash
+             + b"\x14" + tmp + b"\x68" + i32(imp["Not_PreBool"]) + tmp + b"\x16"  # tmp = !tmp
+             + ctx + _u32(20) + i32(0) + b"\x1c" + i32(imp["SetPlayerDash"])
+             + b"\x17" + tmp + b"\x16"                                     # SetPlayerDash(tmp)
+             + b"\x06" + _u32(3813))                                       # return
+    entry = spans[3808]
+    if entry != b"\x06" + _u32(2465):
+        raise RuntimeError("ActionController_Impl: entry jump bytes differ")
+    new_code = bytearray(code)
+    j = None
+    # the 5-byte entry jump sits at the disk offset of mem 3808
+    dd = kismet.Disassembler(pkg, code)
+    while dd.p < size:
+        m, p0 = dd.mem, dd.p
+        dd.expr()
+        if m == 3808:
+            j = p0
+            break
+    new_code[j:j + 5] = b"\x06" + _u32(mem)          # jump to the appended block
+    new_code += block
+    # in-memory size of the block (8-byte object refs, 12-byte names)
+    blk_mem = kismet.Disassembler(pkg, bytes(block))
+    while blk_mem.p < len(block):
+        blk_mem.expr()
+    grow = len(block)
+    out_ue = bytearray(ue[:off - 8]) + struct.pack("<ii", mem + blk_mem.mem, size + grow) \
+        + new_code + ue[off + size:]
+    # export table: this export grows, later ones move
+    e = pkg.exports[fn - 1]
+    s = dt.package_summary(ua)
+    out_ua = bytearray(ua)
+    eo = s["ExportOffset"][1]
+    for i, x in enumerate(pkg.exports):
+        base = eo + i * 104
+        if struct.unpack_from("<qq", out_ua, base + 28) != (x["size"], x["off"] + pkg.header):
+            raise RuntimeError("export table layout not as expected")
+        if i + 1 == fn:
+            struct.pack_into("<q", out_ua, base + 28, x["size"] + grow)
+        elif x["off"] > e["off"]:
+            struct.pack_into("<q", out_ua, base + 36, x["off"] + pkg.header + grow)
+    bo, bv = s["BulkDataStartOffset"]
+    struct.pack_into("<q", out_ua, bo, bv + grow)
+    out_ua, out_ue = bytes(out_ua), bytes(out_ue)
+    # proof: the patched package parses, every other export is byte-identical, and the
+    # event graph reads back as planned
+    new = kismet.Package(out_ua, out_ue)
+    for i, (a, b) in enumerate(zip(pkg.exports, new.exports)):
+        if i + 1 != fn and pkg.ue[a["off"]:a["off"] + a["size"]] != new.ue[b["off"]:b["off"] + b["size"]]:
+            raise RuntimeError(f"dash toggle: export {a['name']} changed")
+    st2 = [s for _m, s in kismet.disassemble(new, fn, past_end=True)]
+    tail = st2[st2.index("END") + 1:]
+    want = ["OnIsPlayerInput(", "JUMPIFNOT 2549", "JUMPIFNOT 3813 (local:exp:K2Node_Event_Press)",
+            "LET local:exp:CallFunc_Not_PreBool_ReturnValue = obj:imp:Default__KSGameStatics.GetPlayerDash(self)",
+            "LET local:exp:CallFunc_Not_PreBool_ReturnValue = Not_PreBool(local:exp:CallFunc_Not_PreBool_ReturnValue)",
+            "obj:imp:Default__KSGameStatics.SetPlayerDash(self, local:exp:CallFunc_Not_PreBool_ReturnValue)",
+            "JUMP 3813"]
+    if len(tail) != len(want) or not all(t.startswith(w) for t, w in zip(tail, want)):
+        raise RuntimeError(f"dash toggle block reads back wrong: {tail}")
+    return out_ua, out_ue
+
+
+def dash_toggle_files(base_pak):
+    ua, ue = patch_dash_toggle(base_pak.read(ACTION + ".uasset"), base_pak.read(ACTION + ".uexp"))
+    return {ACTION + ".uasset": ua, ACTION + ".uexp": ue}

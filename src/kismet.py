@@ -228,22 +228,23 @@ class Disassembler:
             return f"{a}[{E()}]"
         raise ValueError(f"unknown Kismet token {t:#x} at byte {self.p - 1}")
 
-    def statements(self):
-        """-> [(in-memory offset, text)] up to and including END."""
+    def statements(self, past_end=False):
+        """-> [(in-memory offset, text)] up to and including END (or the whole script:
+        code can be appended after END and reached by a jump)."""
         out = []
         while self.p < len(self.c):
             m = self.mem
             s = self.expr()
             out.append((m, s))
-            if s == "END":
+            if s == "END" and not past_end:
                 break
         return out
 
 
-def disassemble(pkg, index):
+def disassemble(pkg, index, past_end=False):
     off, size, mem = pkg.script(index)
     d = Disassembler(pkg, pkg.ue[off:off + size])
-    st = d.statements()
+    st = d.statements(past_end)
     if d.mem != mem or d.p != size:
         raise RuntimeError(f"disassembly out of step: {d.p}/{size} bytes, {d.mem}/{mem} memory")
     return st

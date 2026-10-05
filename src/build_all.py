@@ -46,6 +46,7 @@ CAP_TEST_ITEM = False          # overhaul.ini [legacy] cap_test_charm
 NEW_GEAR = True
 FAST_TRAVEL = True
 CONSUMABLE_UPGRADES = True
+TOGGLE_DASH = False        # overhaul.ini [features] toggle_dash
 CAP_TEST_IN_SHOP = False
 
 # The final boss's prize (user 2026-10-04): +3000 to every stat, dropped by Galdera on
@@ -241,6 +242,10 @@ def main(out_path=None, install=False):
         import blueprint_patch
         files.update(blueprint_patch.patched_files(pak.Pak(paths.base_pak())))
         print("elemental damage boosts count on armour and accessories too")
+    if TOGGLE_DASH:
+        import blueprint_patch
+        files.update(blueprint_patch.dash_toggle_files(pak.Pak(paths.base_pak())))
+        print("dash button toggles running (press once to run, again to walk)")
 
     if FAST_TRAVEL:
         import build_fasttravel_mod
