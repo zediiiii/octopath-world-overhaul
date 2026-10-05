@@ -20,7 +20,7 @@ New-Item -ItemType Directory -Force "$out\data" | Out-Null
 Copy-Item dist\OctopathWorldOverhaul.exe $out
 Copy-Item src\data\item_registry.json "$out\data"
 Copy-Item README.md, LICENSE, CHANGELOG.md $out
-$zip = Join-Path $root "dist\OctopathWorldOverhaul-$version.zip"
+$zip = Join-Path $root "dist\OrsterraUnbound-$version.zip"
 if (Test-Path $zip) { Remove-Item $zip }
 Compress-Archive -Path "$out\*" -DestinationPath $zip
 Write-Output "built $zip"

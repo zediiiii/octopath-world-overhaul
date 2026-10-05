@@ -139,7 +139,8 @@ def load():
     cp = configparser.ConfigParser()
     cp.read_string(DEFAULT_INI)
     if os.path.exists(p):
-        cp.read(p, encoding="utf-8")
+        # utf-8-sig: Notepad (older Windows) saves a byte-order mark the parser rejects
+        cp.read(p, encoding="utf-8-sig")
     preset = cp.get("general", "preset", fallback="adaptive").strip().lower()
     if preset not in PRESETS:
         raise ValueError(f"overhaul.ini: unknown preset '{preset}' "
@@ -159,7 +160,11 @@ def load():
         elif k == "party_margin" and v.lower() in ("off", "none"):
             cfg[k] = None
         else:
-            cfg[k] = float(v)
+            try:
+                cfg[k] = float(v)
+            except ValueError:
+                raise ValueError(f"overhaul.ini [tuning] {k} = {v}: expected a number "
+                                 f"(or leave it empty)") from None
     cfg["features"] = {k: cp.getboolean("features", k, fallback=d)
                        for k, d in FEATURES.items()}
     cfg["save_choice"] = cp.get("general", "save_choice", fallback="ask").strip().lower()

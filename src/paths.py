@@ -102,7 +102,12 @@ def steam_libraries():
 
 def game_dir():
     if OVERRIDES.get("game_dir"):
-        return OVERRIDES["game_dir"]
+        d = OVERRIDES["game_dir"]
+        if not os.path.exists(os.path.join(d, BASE_PAK_REL)):
+            raise RuntimeError(f"game_dir in overhaul.ini is {d}, but the game isn't there: "
+                               "point it at the folder that contains Octopath_Traveler.exe, "
+                               "or leave it empty to find the game through Steam.")
+        return d
     for lib in steam_libraries():
         d = os.path.join(lib, "steamapps", "common", GAME_FOLDER)
         if os.path.exists(os.path.join(d, BASE_PAK_REL)):

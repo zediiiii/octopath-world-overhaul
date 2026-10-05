@@ -400,9 +400,15 @@ def build_and_check(out_path=None, install=False):
                            f"replaced; see the log above")
     if final:
         import shutil
-        shutil.copyfile(path, final + ".new")
-        os.replace(final + ".new", final)
-        os.remove(path)
+        try:
+            shutil.copyfile(path, final + ".new")
+            os.replace(final + ".new", final)    # fails while the game holds the pak open
+        finally:
+            for leftover in (final + ".new", path):
+                try:
+                    os.remove(leftover)
+                except OSError:
+                    pass
         path = final
         print(f"installed {final}")
     return path, minted, floor

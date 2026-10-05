@@ -1,4 +1,7 @@
-# Octopath Traveler — World Overhaul
+# Orsterra Unbound
+### a world overhaul for Octopath Traveler
+
+![Orsterra Unbound](docs/images/banner.png)
 
 A difficulty, progression and gear overhaul for **Octopath Traveler (Steam, PC)** that keeps
 the whole game interesting from the first chapter to the post-game. The world scales to how
@@ -9,6 +12,8 @@ The mod is built **on your PC, from your own game files and your own save**, eve
 launch. No game data is redistributed, and your saves are never modified.
 
 ---
+
+![What changes](docs/images/features.png)
 
 ## Install
 
@@ -26,6 +31,8 @@ otherwise the game starts immediately.
 
 **Requirements:** Windows, the Steam version of Octopath Traveler. Works alongside
 *Better Descriptions*, *Side Stories Helper* and other text mods (their text is kept).
+
+![The launcher](docs/images/picker.png)
 
 ### Uninstall
 
@@ -77,6 +84,8 @@ delete the folder and the desktop shortcut. Your saves were never touched.
   Cask** (50% / 35% max HP). From danger 68, ordinary enemy drops (and Therion's steals)
   become Revitalizing Jam, Olive of Life, and these.
 
+![The gear ladder](docs/images/gear.png)
+
 ### Quality of life
 - **Fast travel to every location you have visited** (dungeons, caves, shrines — not just
   towns). Places you've never been stay locked.
@@ -110,12 +119,24 @@ stage of the game.
 
 ---
 
+![The difficulty curve](docs/images/curve.png)
+
 ## FAQ
 
 **We share a PC / Steam account — does it work for two players?** Yes. The launcher asks
 which save you're about to play and builds the world for that save. Load the same save in
 the game (Continue loads whichever save is newest, so choose it from Load Game if needed).
-Set `save_choice = newest` in `overhaul.ini` to skip the question.
+Starting a brand-new game? Pick **New game** at the bottom of the list. Set
+`save_choice = newest` in `overhaul.ini` to skip the question.
+
+**Something went wrong — will the game still start?** Yes. If the overhaul can't be
+rebuilt (game folder not found, a typo in `overhaul.ini`, the game still running...), you get
+a message saying why and the game starts with the previous build. Details are in the `logs`
+folder next to the exe. A rebuild takes about 15 seconds; if you click Play and nothing
+seems to happen, give it a moment — the progress window may be on another monitor.
+
+**Steam Deck / Linux / Game Pass?** Windows and the Steam version only. (The Game Pass
+version stores its files differently.)
 
 **Does the world change while I play?** The numbers are fixed for a session; the next
 launch recalculates them from your save. Restart the game after a big story jump if you

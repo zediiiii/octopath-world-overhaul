@@ -1,7 +1,13 @@
 # Changelog
 
-## Unreleased
+## 1.0.0-beta.2 — Orsterra Unbound
 
+- New name: **Orsterra Unbound**.
+- Launcher: **New game** in the save picker (and automatically when there are no saves),
+  so a fresh start gets a fresh world. If anything goes wrong before the game starts, you
+  get a message saying why and the game still starts. `overhaul.ini` saved by Notepad with a
+  byte-order mark is read correctly; mistyped values name the setting. A failed install
+  leaves no stray files.
 - Every preset now plays the chapter 1s as vanilla (no extra enemy or boss HP, vanilla enemy
   levels) and builds up to full strength through the mid game. `relentless` is `adaptive`
   until the chapter 4s, then steps up (story +5, party +4, bosses ×2, superbosses ×4)

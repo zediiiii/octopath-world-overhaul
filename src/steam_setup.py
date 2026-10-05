@@ -128,7 +128,7 @@ def launch_options_set():
     return False
 
 
-def create_shortcut(name="Octopath Traveler (World Overhaul)"):
+def create_shortcut(name="Octopath Traveler (Orsterra Unbound)"):
     """Desktop shortcut that runs the launcher, with the game's icon."""
     import ctypes
     buf = ctypes.create_unicode_buffer(260)

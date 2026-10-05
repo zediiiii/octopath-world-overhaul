@@ -216,8 +216,10 @@ def int_offsets(ua, ue, field, expect=None, exact=False):
     return offs
 
 
-# the save the launcher's picker chose; None = newest
+# the save the launcher's picker chose; None = newest; NEW_GAME = no save yet (chapter 0,
+# level 1 - a player starting fresh, or a second player on a shared PC)
 SELECTED_SAVE = None
+NEW_GAME = "<new game>"
 
 
 def expected_danger(chapters):
@@ -379,14 +381,20 @@ def boss_natives(p, rows, cls, curve, levels):
 
 
 def quests_done(save_path=None):
-    saves = rc.find_saves()
-    path = save_path or SELECTED_SAVE or max(saves, key=os.path.getmtime)
+    path = save_path or SELECTED_SAVE
+    if path is None:
+        saves = rc.find_saves()
+        path = max(saves, key=os.path.getmtime) if saves else NEW_GAME
+    if path == NEW_GAME:
+        return NEW_GAME, 0
     s = gvas.SaveFile.load(path)
     return path, s.get("MainProgressPoint").value
 
 
 def party_level(save_path):
     """Average level of the four active party members in the save."""
+    if save_path == NEW_GAME:
+        return 1
     s = gvas.SaveFile.load(save_path)
     slot = {x.name.split("_")[0]: x for x in s.get("slotData").value}
     ids = [getattr(x, "value", x) for x in slot["MainMemberCharacterID"].value]

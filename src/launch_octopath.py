@@ -58,6 +58,11 @@ def save_summary(path):
     import gvas
     import build_difficulty_mod as B
     import respec_core as rc
+    if path == B.NEW_GAME:
+        B.world_floor(0, 1)
+        return dict(path=path, slot="New game", saved="", play="", chapters=0,
+                    party="(no save yet - start a new game)", party_lv=1, floor=1,
+                    danger="vanilla", progress=0)
     s = gvas.SaveFile.load(path)
     progress = s.get("MainProgressPoint").value
     slot = {x.name.split("_")[0]: x for x in s.get("slotData").value}
@@ -81,27 +86,30 @@ def save_summary(path):
 
 
 def pick_save(saves, timeout):
-    """Small window: which save are you about to play? Returns a path or None (cancel)."""
+    """Small window: which save are you about to play? Returns a path, NEW_GAME, or None
+    (cancel). Unreadable saves are left out; the last row is always "New game"."""
     import tkinter as tk
     from tkinter import ttk
+    import build_difficulty_mod as B
     infos = []
     for p in sorted(saves, key=os.path.getmtime, reverse=True):
         try:
             infos.append(save_summary(p))
         except Exception:                            # noqa: BLE001
-            continue
-    if not infos:
-        return None
+            print(f"skipping unreadable save {p}:")
+            print(traceback.format_exc())
+    infos.append(save_summary(B.NEW_GAME))
     if len(infos) == 1:
-        return infos[0]["path"]
+        return B.NEW_GAME
     result = {"path": infos[0]["path"]}
     root = tk.Tk()
-    root.title("Octopath World Overhaul - which save will you play?")
+    root.title("Orsterra Unbound - which save will you play?")
     root.attributes("-topmost", True)
     frm = ttk.Frame(root, padding=12)
     frm.pack(fill="both", expand=True)
     ttk.Label(frm, text="The world is built for the save you pick. Load the SAME save in "
-                        "the game (Continue loads the most recent one).",
+                        "the game (Continue loads the most recent one). Starting over, or a "
+                        "second player on this PC? Pick New game.",
               wraplength=760).pack(anchor="w", pady=(0, 8))
     cols = ("slot", "saved", "play", "chapters", "party", "danger")
     tv = ttk.Treeview(frm, columns=cols, show="headings", height=min(12, len(infos)))
@@ -160,7 +168,7 @@ def setup_dialog():
     from tkinter import ttk, messagebox
     import steam_setup
     root = tk.Tk()
-    root.title("Octopath World Overhaul - setup")
+    root.title("Orsterra Unbound - setup")
     frm = ttk.Frame(root, padding=14)
     frm.pack()
     ttk.Label(frm, text="How do you want to start the game?", font=("", 11, "bold")).pack(
@@ -251,8 +259,12 @@ def update(save_path, log=print):
     log(err)
     log("*** Build FAILED - the previous overhaul stays installed and the game will "
         "start with it. Details are in the logs folder. ***")
-    notify("World Overhaul", "The world could not be rebuilt for this save, so the game will "
-           "start with the previous build. Details: " + paths.log_dir())
+    hint = ""
+    if "PermissionError" in err:
+        hint = ("\n\nWindows refused to write a file: close the game if it is running, and "
+                "check that your antivirus isn't blocking OctopathWorldOverhaul.exe.")
+    notify("Orsterra Unbound", "The world could not be rebuilt for this save, so the game will "
+           "start with the previous build." + hint + "\n\nDetails: " + paths.log_dir())
     return False
 
 
@@ -272,7 +284,7 @@ def with_progress(fn, text):
         import tkinter as tk
         from tkinter import ttk
         root = tk.Tk()
-        root.title("Octopath World Overhaul")
+        root.title("Orsterra Unbound")
         root.attributes("-topmost", True)
         frm = ttk.Frame(root, padding=16)
         frm.pack()
@@ -301,7 +313,9 @@ def notify(title, text):
         import tkinter as tk
         r = tk.Tk()
         r.withdraw()
-        messagebox.showwarning(title, text)
+        # a withdrawn root's dialog can open behind the game or Steam; keep it in front
+        r.attributes("-topmost", True)
+        messagebox.showwarning(title, text, parent=r)
         r.destroy()
     except Exception:                                    # noqa: BLE001
         print(text)
@@ -320,31 +334,18 @@ def main(argv):
     if "--uninstall" in argv:
         uninstall()
         return 0
-    import config
-    import steam_setup
-    # applied now, not just loaded: the save picker shows each save's world danger
-    cfg = config.apply(config.load())
-    if wrap is None and steam_setup.game_running():
-        print("The game is already running.")
-        return 0
-    first_run = not os.path.exists(os.path.join(paths.user_dir(), SETUP_MARK))
-    if first_run and wrap is None and "--build" not in argv and "--newest" not in argv:
-        setup_dialog()
-    saves = paths.find_saves()
-    if not saves:
-        print("No saves yet - the world starts close to vanilla and scales once you save.")
-        save = None
-    elif cfg["save_choice"] == "newest" or "--newest" in argv:
-        save = max(saves, key=os.path.getmtime)
-    else:
-        save = pick_save(saves, cfg["ask_timeout"])
-        if save is None:
-            print("Cancelled.")
-            return 1
-    if save:
-        update(save)
-    if "--build" in argv:
-        return 0
+    try:
+        go = prepare(argv, wrap)
+    except Exception:                                    # noqa: BLE001
+        # Whatever went wrong, Steam's Play button must still start the game - with the
+        # previously installed overhaul, if any.
+        print(traceback.format_exc())
+        notify("Orsterra Unbound", "The overhaul could not be updated, so the game will start "
+               "with the previous build (or without the overhaul).\n\n"
+               + explain(sys.exc_info()[1]) + "\n\nDetails: " + paths.log_dir())
+        go = "--build" not in argv
+    if not go:
+        return 1 if go is None else 0
     if wrap is not None:
         print("starting the game (Steam command) ...")
         sys.stdout.flush()
@@ -353,6 +354,44 @@ def main(argv):
     os.startfile(STEAM_URL)
     time.sleep(2)
     return 0
+
+
+def explain(exc):
+    """A one-line hint for the errors other people's PCs actually produce."""
+    if isinstance(exc, PermissionError):
+        return ("Windows refused to write a file (" + str(exc) + "). If the game is running, "
+                "close it first; otherwise check that your antivirus isn't blocking "
+                "OctopathWorldOverhaul.exe.")
+    return str(exc) or exc.__class__.__name__
+
+
+def prepare(argv, wrap):
+    """Pick the save and build. -> True to start the game, False to stop, None = cancelled."""
+    import config
+    import steam_setup
+    import build_difficulty_mod as B
+    # applied now, not just loaded: the save picker shows each save's world danger
+    cfg = config.apply(config.load())
+    if wrap is None and steam_setup.game_running():
+        print("The game is already running.")
+        return False
+    paths.base_pak()                                     # fails early if the game isn't found
+    first_run = not os.path.exists(os.path.join(paths.user_dir(), SETUP_MARK))
+    if first_run and wrap is None and "--build" not in argv and "--newest" not in argv:
+        setup_dialog()
+    saves = paths.find_saves()
+    if not saves:
+        print("No saves yet - building for a new game (the opening chapters play as vanilla).")
+        save = B.NEW_GAME
+    elif cfg["save_choice"] == "newest" or "--newest" in argv:
+        save = max(saves, key=os.path.getmtime)
+    else:
+        save = pick_save(saves, cfg["ask_timeout"])
+        if save is None:
+            print("Cancelled.")
+            return None
+    update(save)
+    return "--build" not in argv
 
 
 if __name__ == "__main__":
