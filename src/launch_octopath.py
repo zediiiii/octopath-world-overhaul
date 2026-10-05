@@ -64,7 +64,7 @@ def save_summary(path):
                     party="(no save yet - start a new game)", party_lv=1, floor=1,
                     danger="vanilla", progress=0)
     s = gvas.SaveFile.load(path)
-    progress = s.get("MainProgressPoint").value
+    progress = B.chapters_done(s) * B.PROGRESS_PER_QUEST
     slot = {x.name.split("_")[0]: x for x in s.get("slotData").value}
     ids = [getattr(x, "value", x) for x in slot["MainMemberCharacterID"].value]
     lv = {}
@@ -80,7 +80,8 @@ def save_summary(path):
     num = os.path.basename(path)[8:-4]
     return dict(path=path, slot=("Autosave" if num == "0" else f"Slot {num}"),
                 saved=time.strftime("%Y-%m-%d %H:%M", time.localtime(os.path.getmtime(path))),
-                play=f"{secs // 3600}h{secs // 60 % 60:02d}", chapters=progress // 8,
+                play=f"{secs // 3600}h{secs // 60 % 60:02d}",
+                chapters=progress // B.PROGRESS_PER_QUEST,
                 party=", ".join(party), party_lv=party_lv, floor=floor, danger=danger,
                 progress=progress)
 

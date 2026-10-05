@@ -17,6 +17,8 @@ def main(src, dst, level=5):
         for p in m:
             if p.name.startswith("Level") and p.value > 0:
                 p.value = level
+            if p.name.startswith("MainMissionProgressCnt"):
+                p.value = 0
     data = s.to_bytes()
     gvas.SaveFile(data)
     with open(dst, "wb") as f:

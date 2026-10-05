@@ -3,6 +3,10 @@
 ## 1.0.0-beta.2 — Orsterra Unbound
 
 - New name: **Orsterra Unbound**.
+- **Chapters are counted correctly.** The save's MainProgressPoint weighs chapters 1/2/3/4
+  as 1/4/8/16 points; it was read as 8 per chapter, so the story looked far less advanced
+  than it was in the early and mid game (all chapter 2s done read as 5 chapters, not 16).
+  Chapters now come from each traveler's own mission counter.
 - **Leveling no longer runs away.** Enemies keep up with an out-levelled party, but their
   EXP and JP now follow only half of that lead (money still pays in full). Before, a party
   gained a level every ~6 fights however far ahead of the story it was; now being 20

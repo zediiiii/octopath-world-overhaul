@@ -51,7 +51,12 @@ import buildlog
 # 5-12, chapter 2 21-27, chapter 3 32-40, chapter 4 45, interpolated by chapters completed.
 # A party playing at the story's pace meets vanilla-plus enemies; a party that out-levels
 # the story meets enemies that keep up. Presets in config.py set these.
-PROGRESS_PER_QUEST = 8    # MainProgressPoint moves 8 per chapter (measured from saves)
+# "progress" below is chapters completed x PROGRESS_PER_QUEST. Chapters are counted from each
+# traveler's MainMissionProgressCnt (1000 per chapter finished; e.g. 2150 = two done and part
+# of the third). MainProgressPoint is NOT a chapter count: it weighs chapter 1/2/3/4 as
+# 1/4/8/16 points (fitted exactly to 17 real saves), so it undercounts the early game badly.
+PROGRESS_PER_QUEST = 8
+CHAPTER_WEIGHTS = (1, 4, 8, 16)     # MainProgressPoint per chapter 1..4, for the fallback
 # (chapters done, danger): a staircase following the game's chapter recommendations -
 # chapter 1s 5-12 (by travelers recruited), chapter 2s 21-27, chapter 3s 32-40, chapter 4s 45,
 # the finale ~50. Players can mix chapters freely; this tracks the usual order.
@@ -398,7 +403,27 @@ def quests_done(save_path=None):
     if path == NEW_GAME:
         return NEW_GAME, 0
     s = gvas.SaveFile.load(path)
-    return path, s.get("MainProgressPoint").value
+    return path, chapters_done(s) * PROGRESS_PER_QUEST
+
+
+def chapters_done(s):
+    """Main-story chapters finished across all eight travelers (0-32), from a loaded save."""
+    total, found = 0, False
+    for m in s.get("PlayerMember").value:
+        f = {x.name.split("_")[0]: x.value for x in m}
+        if not 1 <= f.get("CharacterID", -1) <= 8 or "MainMissionProgressCnt" not in f:
+            continue
+        found = True
+        total += max(0, min(4, f["MainMissionProgressCnt"] // 1000))
+    if found:
+        return total
+    # no per-traveler counters: estimate from MainProgressPoint, filling chapters in order
+    pts, total = s.get("MainProgressPoint").value, 0
+    for w in CHAPTER_WEIGHTS:
+        n = min(8, pts // w)
+        total += n
+        pts -= n * w
+    return total
 
 
 def party_level(save_path):
@@ -557,7 +582,7 @@ def build(out_path=None, save_path=None, verbose=True, pack=True):
         print(f"party average level {party_lv}: enemy and boss levels raised to at least "
               f"{round(party_lv * ENEMY_LEVEL_WEIGHT)}")
     if verbose:
-        print(f"save {os.path.basename(save)}: MainProgressPoint={progress}, party level "
+        print(f"save {os.path.basename(save)}: {progress // PROGRESS_PER_QUEST} chapters done, party level "
               f"{party_lv} -> world danger floor {floor} (max of {why})")
 
     # ---------------- EnemyDB ----------------
