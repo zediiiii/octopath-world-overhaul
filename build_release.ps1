@@ -11,6 +11,12 @@ python -m PyInstaller --noconfirm --clean --onefile --windowed `
     --hidden-import config --hidden-import build_all --hidden-import validate `
     --hidden-import build_fasttravel_mod --hidden-import steam_setup `
     --hidden-import blueprint_patch --hidden-import kismet `
+    --exclude-module _ssl --exclude-module ssl --exclude-module _hashlib `
+    --exclude-module unittest --exclude-module pydoc --exclude-module email `
+    --exclude-module http --exclude-module xmlrpc --exclude-module urllib.request `
+    --exclude-module asyncio --exclude-module multiprocessing --exclude-module sqlite3 `
+    --exclude-module _decimal --exclude-module lzma --exclude-module _lzma `
+    --exclude-module bz2 --exclude-module _bz2 --exclude-module pyexpat --exclude-module xml `
     src\launch_octopath.py
 if ($LASTEXITCODE -ne 0) { throw "PyInstaller failed" }
 

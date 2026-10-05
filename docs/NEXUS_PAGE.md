@@ -4,7 +4,7 @@
 **Category:** Overhauls
 **Version:** 1.0.0-beta.2
 **Short description (350 chars max):** Vanilla chapter 1s, then a world that keeps up: enemies
-and bosses scale with your story and party, 450 new multi-stat items to level 99, stats past
+and bosses scale with your story and party, 560+ new multi-stat items up to level 104, stats past
 999, elemental boosts that work on accessories, fast travel to visited places, half the random
 encounters, catch-up leveling. Built from your own files; saves never modified.
 
@@ -33,13 +33,16 @@ The whole journey stays a real fight — from the first chapter to the last boss
 [*]Provoke / Challenge fights and caits are untouched. H'aanit's captured beasts and Tressa's Collect keep pace.
 [/list]
 
-[size=5][b]450 new items[/b][/size]
+[size=5][b]560+ new items[/b][/size]
 [list]
-[*]Five tiers — Tempered, Runeforged, Astral, Sovereign, Eternal (levels 60–99) — sold in Grandport as the world reaches them, and as rare drops (every boss drops one).
+[*]Six tiers — Tempered, Runeforged, Astral, Sovereign, Eternal and Mythic (levels 60–104) — sold in Grandport as the world reaches them, and as rare drops (every boss drops one).
 [*]Every piece boosts several stats, and the description lists every number and how it stacks.
 [*]Weapon styles with on-hit effects, Twinfang double strikes, Gambler's crit-or-miss, Headsman's instant kills, dual-element weapons, Hallowed healer staves, a physical War Staff, status-immunity talismans, regen pendants, elemental wards, sigils and hearts.
 [*]Big SP and %HP restoratives; late in the game ordinary drops and steals become Revitalizing Jam and friends.
 [*]Gear you already own is never changed. New gear sells back for half its price, so you can try it on.
+[*][b]Fortune's Purse[/b]: triple JP and battle money (the best JP/money item worn counts; they don't stack).
+[*][b]Wayfarer's Laurel[/b]: appears in Grandport once you've finished every side story — +1,500 to every stat, regeneration, more EXP, JP and money.
+[*][b]Unbound Crown[/b]: +3,000 to every stat, dropped by Galdera.
 [/list]
 
 [size=5][b]Beyond every cap[/b][/size]
@@ -52,14 +55,14 @@ The whole journey stays a real fight — from the first chapter to the last boss
 [list]
 [*]Fast travel to every location you've visited (unvisited places stay locked).
 [*]Evasive Maneuvers built in — half the random encounters, one support-skill slot freed.
-[*]Catch-up leveling: travelers who fell behind level up to 5× faster.
+[*]Catch-up leveling: travelers far behind your party get their early levels up to 5× cheaper (the last few levels before they catch up cost the usual total).
 [/list]
 
 [size=5][b]Presets[/b][/size]
 [list]
 [*][b]classic[/b] — the story's own curve, plus the gear, caps and quality of life.
 [*][b]adaptive[/b] (default) — a little above the story, and never below your party.
-[*][b]relentless[/b] — adaptive, then a step harder from the chapter 4s: enemies above your level, bosses ×2 HP, superbosses ×4.
+[*][b]relentless[/b] — adaptive, then a step harder from the chapter 4s: enemies above your level, bosses ×2 HP, superbosses ×4. The world keeps growing with everything you complete — main story, side stories, optional bosses and exploration — up to danger 104. The Gate of Finis bosses fight at 94 or more, and Galdera waits at 104.
 [/list]
 Every feature can be switched off in overhaul.ini.
 
@@ -74,7 +77,7 @@ From then on, just press Play. The world is rebuilt from your save whenever your
 [b]Uninstall:[/b] run OctopathWorldOverhaul.exe --uninstall, then delete the folder.
 
 [size=5][b]Compatibility[/b][/size]
-Steam version on Windows (not Game Pass, not Steam Deck/Linux). Works with Better Descriptions, Side Stories Helper and other text mods (their text is kept). Conflicts with mods that replace EnemyDB, ItemDB, ShopList, EncountVolumeData or BattlePlayerBP — this one loads last and wins. New item text is English in every language.
+Steam version on Windows (not Game Pass, not Steam Deck/Linux). Works with Better Descriptions, Side Stories Helper and other text mods (their text is kept). Conflicts with mods that replace EnemyDB, ItemDB, ShopList, EncountVolumeData, BattlePlayerBP or BattleManagerBP — this one loads last and wins. New item text is English in every language.
 
 [size=5][b]Good to know[/b][/size]
 [list]
