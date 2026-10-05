@@ -13,8 +13,7 @@ picker.png.
 
 **Files:** `OrsterraUnbound-<version>.zip` from `build_release.ps1` (main file).
 
-**Requirements:** none (Steam version, Windows). **Permissions:** MIT (see LICENSE); source on
-GitHub.
+**Requirements:** none (Steam version, Windows). **Permissions:** MIT (see LICENSE).
 
 ---
 
@@ -81,7 +80,7 @@ Steam version on Windows (not Game Pass, not Steam Deck/Linux). Works with Bette
 [list]
 [*]No game files are included: the mod is built on your PC from your own installation.
 [*]Your saves are only read, never written.
-[*]The exe is a packaged Python program (PyInstaller); some antivirus tools flag those by habit. The full source is on GitHub and runs the same from source.
+[*]The exe is a packaged Python program (PyInstaller); some antivirus tools flag those by habit.
 [*]The fifth support-skill slot isn't possible: the slot count lives in the game's code.
 [/list]
 ```
