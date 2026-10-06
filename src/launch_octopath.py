@@ -1,4 +1,4 @@
-"""Octopath Traveler - World Overhaul launcher (OctopathWorldOverhaul.exe).
+"""Orsterra Unbound launcher (a release starts it with "Start Orsterra Unbound.cmd").
 
 The overhaul's numbers are baked into a pak built from YOUR save: how far the story is and
 how strong the party is. The game can't recalculate them itself, so this runs before the game:
@@ -10,10 +10,10 @@ how strong the party is. The game can't recalculate them itself, so this runs be
   3. start the game
 
 Usage
-  OctopathWorldOverhaul.exe              pick a save, update, start the game via Steam
-  OctopathWorldOverhaul.exe --setup      Steam Play button / Big Picture + desktop shortcut
-  OctopathWorldOverhaul.exe --uninstall  remove the pak and the Steam hook
-  OctopathWorldOverhaul.exe --build      update only, don't start the game
+  launch_octopath.py              pick a save, update, start the game via Steam
+  launch_octopath.py --setup      Steam Play button / Big Picture + desktop shortcut
+  launch_octopath.py --uninstall  remove the pak and the Steam hook
+  launch_octopath.py --build      update only, don't start the game
   ... --wrap <command>                   used by Steam's Launch Options (%command%)
   ... --newest                           skip the picker, use the newest save
 """
@@ -218,8 +218,12 @@ def uninstall():
     for f in (stamp_path(), os.path.join(paths.user_dir(), SETUP_MARK)):
         if os.path.exists(f):
             os.remove(f)
-    print("Uninstalled. Delete the desktop shortcut and this folder if you like; your saves "
-          "were never modified.")
+    msg = ("Orsterra Unbound is uninstalled: the mod file is removed and Steam's Play button "
+           "starts the game normally again.\n\nYou can now delete the desktop shortcut and this "
+           "folder. Your saves were never modified.")
+    print(msg)
+    if paths.packaged():
+        notify("Orsterra Unbound", msg, info=True)
 
 
 # ------------------------------------------------------------------ main
@@ -268,7 +272,7 @@ def update(save_path, log=print):
     hint = ""
     if "PermissionError" in err:
         hint = ("\n\nWindows refused to write a file: close the game if it is running, and "
-                "check that your antivirus isn't blocking OctopathWorldOverhaul.exe.")
+                "check that your antivirus isn't blocking Orsterra Unbound's pythonw.exe.")
     notify("Orsterra Unbound", "The world could not be rebuilt for this save, so the game will "
            "start with the previous build." + hint + "\n\nDetails: " + paths.log_dir())
     return False
@@ -322,7 +326,7 @@ def with_progress(fn, text):
     return box["err"]
 
 
-def notify(title, text):
+def notify(title, text, info=False):
     try:
         from tkinter import messagebox
         import tkinter as tk
@@ -330,7 +334,7 @@ def notify(title, text):
         r.withdraw()
         # a withdrawn root's dialog can open behind the game or Steam; keep it in front
         r.attributes("-topmost", True)
-        messagebox.showwarning(title, text, parent=r)
+        (messagebox.showinfo if info else messagebox.showwarning)(title, text, parent=r)
         r.destroy()
     except Exception:                                    # noqa: BLE001
         print(text)
@@ -498,7 +502,7 @@ def explain(exc):
     if isinstance(exc, PermissionError):
         return ("Windows refused to write a file (" + str(exc) + "). If the game is running, "
                 "close it first; otherwise check that your antivirus isn't blocking "
-                "OctopathWorldOverhaul.exe.")
+                "Orsterra Unbound's pythonw.exe.")
     return str(exc) or exc.__class__.__name__
 
 
@@ -514,7 +518,10 @@ def prepare(argv, wrap):
         return False
     paths.base_pak()                                     # fails early if the game isn't found
     first_run = not os.path.exists(os.path.join(paths.user_dir(), SETUP_MARK))
-    if first_run and wrap is None and "--build" not in argv and "--newest" not in argv:
+    # a release that Steam doesn't start yet (updated from an older version, or moved)
+    # offers setup again, so the Play button runs this copy
+    if wrap is None and "--build" not in argv and "--newest" not in argv and (
+            first_run or paths.packaged() and steam_setup.hook_outdated()):
         setup_dialog()
     saves = paths.find_saves()
     if not saves:

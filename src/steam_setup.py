@@ -18,9 +18,10 @@ APP = paths.APP_ID
 
 
 def launcher_command():
-    """How Steam should start us, release exe or Python source."""
-    if paths.packaged():
-        return f'"{paths.launcher_exe()}" --wrap %command%'
+    """How Steam should start us: pythonw.exe (the release's bundled one, or the
+    installed one from source) running launch_octopath.py."""
+    if getattr(sys, "frozen", False):
+        return f'"{sys.executable}" --wrap %command%'
     pyw = sys.executable
     if os.path.basename(pyw).lower() == "python.exe":
         cand = os.path.join(os.path.dirname(pyw), "pythonw.exe")
@@ -132,14 +133,30 @@ def launch_options_set():
     return False
 
 
+def hook_outdated():
+    """True if Steam runs an Orsterra launcher, but not this one (e.g. the exe of an older
+    version, or the release folder moved)."""
+    want = _vdf_escape(launcher_command()).lower()
+    for cfg in paths.steam_userdata_configs():
+        with open(cfg, encoding="utf-8") as f:
+            text = f.read()
+        blk = _app_block(text)
+        if not blk:
+            continue
+        body = text[blk[0]:blk[1]].lower()
+        if ("launch_octopath" in body or "octopathworldoverhaul" in body) and want not in body:
+            return True
+    return False
+
+
 def create_shortcut(name="Octopath Traveler (Orsterra Unbound)"):
     """Desktop shortcut that runs the launcher, with the game's icon."""
     import ctypes
     buf = ctypes.create_unicode_buffer(260)
     ctypes.windll.shell32.SHGetFolderPathW(None, 0x10, None, 0, buf)     # CSIDL_DESKTOPDIRECTORY
     lnk = os.path.join(buf.value, name + ".lnk")
-    if paths.packaged():
-        target, args = paths.launcher_exe(), ""
+    if getattr(sys, "frozen", False):
+        target, args = sys.executable, ""
     else:
         target = sys.executable
         args = f'"{os.path.join(os.path.dirname(os.path.abspath(__file__)), "launch_octopath.py")}"'

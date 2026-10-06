@@ -19,21 +19,28 @@ MODS_REL = "Octopath_Traveler/Content/Paks/~mods"
 OVERRIDES = {"game_dir": "", "save_dir": ""}
 
 
+def _release_root():
+    """The release folder when running on its bundled Python (<root>/runtime/pythonw.exe
+    with the source in <root>/app), else None."""
+    rt = os.path.dirname(os.path.abspath(sys.executable))
+    root = os.path.dirname(rt)
+    if os.path.basename(rt).lower() == "runtime" and \
+            os.path.isfile(os.path.join(root, "app", "launch_octopath.py")):
+        return root
+    return None
+
+
 def packaged():
-    """True in a release: started by OctopathWorldOverhaul.exe, which runs the bundled
-    Python and names itself in ORSTERRA_LAUNCHER (or an older PyInstaller exe)."""
-    return bool(os.environ.get("ORSTERRA_LAUNCHER")) or getattr(sys, "frozen", False)
-
-
-def launcher_exe():
-    """The exe that Steam and the desktop shortcut should start (releases only)."""
-    return os.environ.get("ORSTERRA_LAUNCHER") or sys.executable
+    """True in a release (bundled runtime, or a pre-beta.4 PyInstaller exe)."""
+    return getattr(sys, "frozen", False) or _release_root() is not None
 
 
 def app_dir():
-    """Folder of the exe (release) or the repo root (running from source)."""
-    if packaged():
-        return os.path.dirname(launcher_exe())
+    """The release folder, or the repo root when running from source."""
+    if getattr(sys, "frozen", False):
+        return os.path.dirname(sys.executable)
+    if _release_root():
+        return _release_root()
     return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 

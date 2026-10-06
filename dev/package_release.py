@@ -3,8 +3,10 @@
 No PyInstaller: a one-file PyInstaller exe is a loader plus a packed archive, the same shape
 as Python malware, so some antivirus tools flag it. The release is instead
 
-  OctopathWorldOverhaul.exe   a few-KB launcher compiled from launcher\\*.cs with Windows'
-                              own C# compiler; runs runtime\\pythonw.exe app\\launch_octopath.py
+  Start Orsterra Unbound.cmd       runs runtime\\pythonw.exe app\\launch_octopath.py; setup then
+  Uninstall Orsterra Unbound.cmd   points Steam and the desktop shortcut straight at pythonw.exe.
+                              No exe of our own: an unsigned launcher exe drew machine-learning
+                              "suspicious" verdicts too.
   runtime\\                    the official python.org runtime (signed by the PSF), trimmed:
                               the interpreter, the DLLs the mod uses, a zipped standard library
                               and Tcl/Tk for the windows
@@ -18,7 +20,6 @@ import glob
 import importlib._bootstrap_external
 import os
 import shutil
-import subprocess
 import sys
 import zipfile
 
@@ -28,15 +29,13 @@ import version  # noqa: E402
 
 PY = sys.base_prefix
 TAG = f"python{sys.version_info.major}{sys.version_info.minor}"
-CSC = os.path.join(os.environ.get("WINDIR", r"C:\Windows"),
-                   r"Microsoft.NET\Framework64\v4.0.30319\csc.exe")
 
 # interpreter files (signed by the Python Software Foundation)
 CORE = ["pythonw.exe", "python.exe", f"{TAG}.dll", "python3.dll", "vcruntime140.dll",
         "vcruntime140_1.dll", "LICENSE.txt"]
 # extension modules the mod doesn't need (tests, networking, crypto, databases)
-SKIP_DLLS = ("_test", "_ctypes_test", "_ssl", "_hashlib", "libssl", "libcrypto", "sqlite3", "_sqlite3",
-             "_remote_debugging", "_socket", "select", "_overlapped", "_asyncio",
+SKIP_DLLS = ("_test", "_ctypes_test", "_ssl", "_hashlib", "libssl", "libcrypto", "sqlite3",
+             "_sqlite3", "_remote_debugging", "_socket", "select", "_overlapped", "_asyncio",
              "_multiprocessing", "_wmi")
 # standard-library packages the mod doesn't need
 SKIP_LIB = {"site-packages", "test", "idlelib", "ensurepip", "turtledemo", "lib2to3",
@@ -83,11 +82,28 @@ def copy_runtime(dst):
         f.write(f"{TAG}.zip\n.\n..\\app\n")
 
 
-def compile_launcher(dst):
-    src = os.path.join(ROOT, "launcher", "OctopathWorldOverhaul.cs")
-    out = os.path.join(dst, "OctopathWorldOverhaul.exe")
-    subprocess.run([CSC, "/nologo", "/target:winexe", "/optimize+", "/platform:anycpu",
-                    "/reference:System.Windows.Forms.dll", f"/out:{out}", src], check=True)
+# double-click entry points (CRLF; %~dp0 = this folder)
+SCRIPT = r"""@echo off
+rem Orsterra Unbound: {what} with the Python runtime in this folder
+rem (python.org's own, signed by the Python Software Foundation).
+if not exist "%~dp0runtime\pythonw.exe" (
+  echo Orsterra Unbound's files are missing.
+  echo Extract the WHOLE zip first - right-click it and choose Extract All - then
+  echo double-click this file again inside the extracted folder.
+  pause
+  exit /b 1
+)
+start "" "%~dp0runtime\pythonw.exe" "%~dp0app\launch_octopath.py" {args}
+"""
+SCRIPTS = {"Start Orsterra Unbound.cmd": ("pick a save, update the world, start the game", "%*"),
+           "Uninstall Orsterra Unbound.cmd": ("remove the mod and the Steam hook",
+                                              "--uninstall")}
+
+
+def write_scripts(dst):
+    for name, (what, args) in SCRIPTS.items():
+        with open(os.path.join(dst, name), "w", newline="\r\n") as f:
+            f.write(SCRIPT.format(what=what, args=args))
 
 
 def main():
@@ -96,7 +112,7 @@ def main():
     if os.path.exists(out):
         shutil.rmtree(out)
     os.makedirs(out)
-    compile_launcher(out)
+    write_scripts(out)
     copy_runtime(os.path.join(out, "runtime"))
     app = os.path.join(out, "app")
     os.makedirs(app)

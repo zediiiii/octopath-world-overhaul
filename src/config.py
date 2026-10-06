@@ -79,7 +79,7 @@ FEATURES = {
 
 DEFAULT_INI = """\
 ; Octopath Traveler - World Overhaul settings.
-; Changes take effect the next time you launch through OctopathWorldOverhaul.exe.
+; Changes take effect the next time you launch the game (Steam Play button or the desktop shortcut).
 
 [general]
 ; Every preset plays the chapter 1s as vanilla and builds up through the mid game.
