@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.0-beta.4
+
+- **No more PyInstaller exe** (some antivirus tools flagged it as a trojan - a false
+  positive caused by the packed-exe format, shared with Python malware). The zip now holds a
+  few-KB launcher (`OctopathWorldOverhaul.exe`, same name, same place, so the Steam Play
+  button keeps working), the official signed python.org runtime (`runtime\`) and the mod's
+  source as plain files (`app\`). Install and use are unchanged. Extract over the old folder
+  to update.
+
 ## 1.0.0-beta.3
 
 - **Fixed: Larger Monster Roster's 10-beast limit was reset to 6** by catch-up leveling's

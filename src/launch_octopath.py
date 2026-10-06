@@ -42,7 +42,7 @@ def stamp_path():
 
 
 def source_hash():
-    if getattr(sys, "frozen", False):
+    if paths.packaged():
         return version.VERSION
     h = hashlib.sha256()
     for f in sorted(glob.glob(os.path.join(HERE, "*.py"))):

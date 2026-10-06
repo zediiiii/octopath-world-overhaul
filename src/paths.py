@@ -19,16 +19,27 @@ MODS_REL = "Octopath_Traveler/Content/Paks/~mods"
 OVERRIDES = {"game_dir": "", "save_dir": ""}
 
 
+def packaged():
+    """True in a release: started by OctopathWorldOverhaul.exe, which runs the bundled
+    Python and names itself in ORSTERRA_LAUNCHER (or an older PyInstaller exe)."""
+    return bool(os.environ.get("ORSTERRA_LAUNCHER")) or getattr(sys, "frozen", False)
+
+
+def launcher_exe():
+    """The exe that Steam and the desktop shortcut should start (releases only)."""
+    return os.environ.get("ORSTERRA_LAUNCHER") or sys.executable
+
+
 def app_dir():
-    """Folder of the exe (frozen) or the repo root (running from source)."""
-    if getattr(sys, "frozen", False):
-        return os.path.dirname(sys.executable)
+    """Folder of the exe (release) or the repo root (running from source)."""
+    if packaged():
+        return os.path.dirname(launcher_exe())
     return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def data_dir():
     """Shipped data (item_registry.json). Next to the exe, or src/data from source."""
-    if getattr(sys, "frozen", False):
+    if packaged():
         return os.path.join(app_dir(), "data")
     return os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 

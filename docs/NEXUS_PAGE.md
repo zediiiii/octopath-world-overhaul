@@ -2,7 +2,7 @@
 
 **Name:** Orsterra Unbound - World Overhaul
 **Category:** Overhauls
-**Version:** 1.0.0-beta.3
+**Version:** 1.0.0-beta.4
 **Short description (350 chars max):** Vanilla chapter 1s, then a world that keeps up: enemies
 and bosses scale with your story and party, 560+ new multi-stat items up to level 104, stats past
 999, elemental boosts that work on accessories, fast travel to visited places, half the random
@@ -11,7 +11,7 @@ encounters, catch-up leveling. Built from your own files; saves never modified.
 **Images** (docs/images, 1920x1080): banner.png (main), features.png, curve.png, gear.png,
 picker.png.
 
-**Files:** `OrsterraUnbound-<version>.zip` from `build_release.ps1` (main file).
+**Files:** `OrsterraUnbound-<version>.zip` from `python dev/package_release.py` (main file).
 
 **Requirements:** none (Steam version, Windows). **Permissions:** MIT (see LICENSE).
 
@@ -96,7 +96,7 @@ Steam version on Windows (not Game Pass, not Steam Deck/Linux). Other text mods 
 [*][b]Play in borderless fullscreen.[/b] The launcher shows a banner while you play when your progress would grow the world; in exclusive fullscreen nothing can appear over the game, so you'd only see it after Alt-Tab. Borderless also avoids a display crash on some streaming / virtual-display setups.
 [*]No game files are included: the mod is built on your PC from your own installation.
 [*]Your saves are only read, never written.
-[*]The exe is a packaged Python program (PyInstaller); some antivirus tools flag those by habit.
+[*]No packed exe: OctopathWorldOverhaul.exe is a tiny launcher for the official, signed python.org runtime included in the zip, and the mod's source is plain text in the app folder. Windows may say "Windows protected your PC" the first time (the launcher isn't code-signed): click More info, then Run anyway.
 [*]The fifth support-skill slot isn't possible: the slot count lives in the game's code.
 [/list]
 ```

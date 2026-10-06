@@ -18,9 +18,9 @@ APP = paths.APP_ID
 
 
 def launcher_command():
-    """How Steam should start us, frozen exe or Python source."""
-    if getattr(sys, "frozen", False):
-        return f'"{sys.executable}" --wrap %command%'
+    """How Steam should start us, release exe or Python source."""
+    if paths.packaged():
+        return f'"{paths.launcher_exe()}" --wrap %command%'
     pyw = sys.executable
     if os.path.basename(pyw).lower() == "python.exe":
         cand = os.path.join(os.path.dirname(pyw), "pythonw.exe")
@@ -138,8 +138,8 @@ def create_shortcut(name="Octopath Traveler (Orsterra Unbound)"):
     buf = ctypes.create_unicode_buffer(260)
     ctypes.windll.shell32.SHGetFolderPathW(None, 0x10, None, 0, buf)     # CSIDL_DESKTOPDIRECTORY
     lnk = os.path.join(buf.value, name + ".lnk")
-    if getattr(sys, "frozen", False):
-        target, args = sys.executable, ""
+    if paths.packaged():
+        target, args = paths.launcher_exe(), ""
     else:
         target = sys.executable
         args = f'"{os.path.join(os.path.dirname(os.path.abspath(__file__)), "launch_octopath.py")}"'

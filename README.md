@@ -177,9 +177,12 @@ want the world to catch up straight away.
 
 **Other languages?** New item names and descriptions are in English in every language.
 
-**Antivirus warning?** The exe is a packaged Python program (PyInstaller), which some
-scanners flag by habit. The full source is in this repository, and you can run it from
-source instead (see below).
+**Antivirus warning?** Since beta.4 there is no packed exe: `OctopathWorldOverhaul.exe` is
+a few-KB launcher that starts the official, signed python.org runtime in `runtime\` with the
+mod's plain-text source in `app\` - you can read every line. (Earlier versions were a
+PyInstaller exe, a format some scanners flag by habit.) Windows may still say "Windows
+protected your PC" the first time, because the launcher isn't code-signed: click **More info**
+then **Run anyway**.
 
 **Can I get a fifth support-skill slot?** No — the slot count lives in the game's code, not
 its data. (Tested: the game ignores a fifth skill and removes it on save.) The built-in
@@ -190,13 +193,13 @@ Evasive Maneuvers and the uncapped damage free up two slots instead.
 ## Running from source
 
 ```bash
-pip install -r requirements-dev.txt     # only needed to build the exe
 python src/launch_octopath.py           # same as the exe
 python src/build_all.py                 # build a pak to the current folder, validate it
 python dev/balance_report.py            # balance tables for every preset
 ```
 
-Build the release exe with `powershell -File build_release.ps1`.
+Build the release (launcher + trimmed python.org runtime + source) with
+`python dev/package_release.py` - it uses the Python on PATH as the runtime.
 
 How it works, and why: [docs/DESIGN.md](docs/DESIGN.md).
 
