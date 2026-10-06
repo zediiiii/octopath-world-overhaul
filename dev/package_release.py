@@ -3,8 +3,8 @@
 No PyInstaller: a one-file PyInstaller exe is a loader plus a packed archive, the same shape
 as Python malware, so some antivirus tools flag it. The release is instead
 
-  Start Orsterra Unbound.cmd       runs runtime\\pythonw.exe app\\launch_octopath.py; setup then
-  Uninstall Orsterra Unbound.cmd   points Steam and the desktop shortcut straight at pythonw.exe.
+  OrsterraUnbound.cmd       runs runtime\\pythonw.exe app\\launch_octopath.py; setup then
+  Uninstall-OrsterraUnbound.cmd   points Steam and the desktop shortcut straight at pythonw.exe.
                               No exe of our own: an unsigned launcher exe drew machine-learning
                               "suspicious" verdicts too.
   runtime\\                    the official python.org runtime (signed by the PSF), trimmed:
@@ -95,8 +95,8 @@ if not exist "%~dp0runtime\pythonw.exe" (
 )
 start "" "%~dp0runtime\pythonw.exe" "%~dp0app\launch_octopath.py" {args}
 """
-SCRIPTS = {"Start Orsterra Unbound.cmd": ("pick a save, update the world, start the game", "%*"),
-           "Uninstall Orsterra Unbound.cmd": ("remove the mod and the Steam hook",
+SCRIPTS = {"OrsterraUnbound.cmd": ("pick a save, update the world, start the game", "%*"),
+           "Uninstall-OrsterraUnbound.cmd": ("remove the mod and the Steam hook",
                                               "--uninstall")}
 
 

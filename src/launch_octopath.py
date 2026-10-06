@@ -1,4 +1,4 @@
-"""Orsterra Unbound launcher (a release starts it with "Start Orsterra Unbound.cmd").
+"""Orsterra Unbound launcher (a release starts it with "OrsterraUnbound.cmd").
 
 The overhaul's numbers are baked into a pak built from YOUR save: how far the story is and
 how strong the party is. The game can't recalculate them itself, so this runs before the game:

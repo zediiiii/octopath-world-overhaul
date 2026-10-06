@@ -70,13 +70,13 @@ Every feature can be switched off in overhaul.ini.
 [size=5][b]Install[/b][/size]
 [list=1]
 [*]Right-click the zip, choose Extract All (for example to Documents\OrsterraUnbound). Keep the files together.
-[*]Double-click [b]Start Orsterra Unbound[/b]. Setup offers to hook Steam's Play button and Big Picture (Steam restarts once) and to add a desktop shortcut.
+[*]Double-click [b]OrsterraUnbound[/b]. Setup offers to hook Steam's Play button and Big Picture (Steam restarts once) and to add a desktop shortcut.
 [*]Pick the save you're about to play — or New game — and load that same save in the game.
 [/list]
 From then on, just press Play. The world is rebuilt from your save whenever your story, party or settings change (about 15 seconds). If anything goes wrong, you get a message and the game still starts.
 
-[b]Updating from beta.3 or earlier:[/b] extract over the old folder and double-click Start Orsterra Unbound once, so setup points Steam's Play button at the new version; then delete the old OctopathWorldOverhaul.exe.
-[b]Uninstall:[/b] double-click Uninstall Orsterra Unbound, then delete the folder.
+[b]Updating from beta.3 or earlier:[/b] extract over the old folder and double-click OrsterraUnbound once, so setup points Steam's Play button at the new version; then delete the old OctopathWorldOverhaul.exe.
+[b]Uninstall:[/b] double-click Uninstall-OrsterraUnbound, then delete the folder.
 
 [size=5][b]Requirements & credits[/b][/size]
 [b]Requirements: none.[/b] Everything is built from your own game install; no other mod is needed.
@@ -97,7 +97,7 @@ Steam version on Windows (not Game Pass, not Steam Deck/Linux). Other text mods 
 [*][b]Play in borderless fullscreen.[/b] The launcher shows a banner while you play when your progress would grow the world; in exclusive fullscreen nothing can appear over the game, so you'd only see it after Alt-Tab. Borderless also avoids a display crash on some streaming / virtual-display setups.
 [*]No game files are included: the mod is built on your PC from your own installation.
 [*]Your saves are only read, never written.
-[*]No exe of its own: the only programs in the zip are the official python.org runtime, digitally signed by the Python Software Foundation. The mod is plain-text Python source in the app folder (read every line), and Start Orsterra Unbound is a two-line script. Windows may ask "Do you want to run this file?" the first time: click Run.
+[*]No exe of its own: the only programs in the zip are the official python.org runtime, digitally signed by the Python Software Foundation. The mod is plain-text Python source in the app folder (read every line), and OrsterraUnbound is a two-line script. Windows may ask "Do you want to run this file?" the first time: click Run.
 [*]The fifth support-skill slot isn't possible: the slot count lives in the game's code.
 [/list]
 ```

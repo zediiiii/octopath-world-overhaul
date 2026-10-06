@@ -19,7 +19,7 @@ launch. No game data is redistributed, and your saves are never modified.
 
 1. Download the latest release, right-click the zip and choose **Extract All** (for example
    to `Documents\OrsterraUnbound`). Keep the files together.
-2. Double-click **`Start Orsterra Unbound`** in the extracted folder. On first run a small
+2. Double-click **`OrsterraUnbound`** in the extracted folder. On first run a small
    setup window offers to:
    - make **Steam's Play button and Big Picture** run the overhaul first (Steam restarts once)
    - add a **desktop shortcut**
@@ -37,13 +37,13 @@ otherwise the game starts immediately.
 
 ### Uninstall
 
-Double-click **`Uninstall Orsterra Unbound`** (removes the mod file and the Steam hook), then
+Double-click **`Uninstall-OrsterraUnbound`** (removes the mod file and the Steam hook), then
 delete the folder and the desktop shortcut. Your saves were never touched.
 
 ### Updating
 
 Extract the new zip over the old folder. Coming from beta.3 or earlier, double-click
-**`Start Orsterra Unbound`** once: the setup window comes back to point Steam's Play button and
+**`OrsterraUnbound`** once: the setup window comes back to point Steam's Play button and
 the shortcut at the new version. You can then delete the old `OctopathWorldOverhaul.exe`.
 
 ---
@@ -187,7 +187,7 @@ want the world to catch up straight away.
 **Antivirus warning?** Since beta.4 the mod ships no exe of its own. The only programs in the
 zip are the official python.org runtime (`runtime\`, digitally signed by the Python Software
 Foundation); the mod itself is plain-text Python source in `app\` - you can read every line -
-and `Start Orsterra Unbound.cmd` is a two-line script that starts it. (Earlier versions were
+and `OrsterraUnbound.cmd` is a two-line script that starts it. (Earlier versions were
 a PyInstaller exe, a format some scanners flag by habit.) Windows may ask "Do you want to run
 this file?" the first time: click **Run**.
 

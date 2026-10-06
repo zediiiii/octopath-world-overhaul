@@ -5,10 +5,10 @@
 - **No more PyInstaller exe** (some antivirus tools flagged it as a trojan - a false
   positive caused by the packed-exe format, shared with Python malware). The zip now holds
   the official python.org runtime (`runtime\`, signed by the Python Software Foundation),
-  the mod's source as plain files (`app\`) and two double-click scripts: **Start Orsterra
-  Unbound** and **Uninstall Orsterra Unbound**. Steam's Play button and the desktop shortcut
+  the mod's source as plain files (`app\`) and two double-click scripts: **OrsterraUnbound**
+  and **Uninstall-OrsterraUnbound**. Steam's Play button and the desktop shortcut
   run the signed `pythonw.exe` directly.
-- **Updating from beta.3 or earlier:** extract over the old folder and double-click Start
+- **Updating from beta.3 or earlier:** extract over the old folder and double-click OrsterraUnbound
   Orsterra Unbound once; setup comes back to point Steam and the shortcut at the new version.
   Then delete the old `OctopathWorldOverhaul.exe`.
 - Uninstall now confirms in a window.
