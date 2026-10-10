@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.0-beta.5
+
+- **Fixed: catch-up leveling stalled 5-10 levels below the party.** It made low levels 5x
+  cheaper but ramped back to the normal totals just below the party, which charged the saved
+  EXP back: those levels cost 2-3x the normal EXP, so a traveler there levelled slower than
+  the party. Now every level more than 4 below the party average is 5x cheaper, with no
+  payback zone: travelers below that line jump to about 5 levels under the party after their
+  next battle and keep pace as the party levels. The party's own levels are unchanged.
+
 ## 1.0.0-beta.4
 
 - **No more PyInstaller exe** (some antivirus tools flagged it as a trojan - a false

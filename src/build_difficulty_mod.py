@@ -97,14 +97,16 @@ BOSS_HP_MULT = 2.0        # user 2026-10-04: 2x (Winnehild's Battle Cry ~24k x6 
 SCALE_REWARDS = True
 # Catch-up leveling. CharacterGrowData's TotalExp is one table shared by all eight characters
 # and the save stores cumulative EXP, so cheapening low levels must NOT lower the totals of
-# levels the main party has reached (they would level instantly). Levels below
-# (party average - CATCHUP_MARGIN) cost 1/CATCHUP_FACTOR of the EXP, ramping back to vanilla
-# over CATCHUP_RAMP levels; everything at or above the threshold is untouched. Rebuilt when
-# the party levels, so the threshold follows the party.
+# levels the main party has reached (they would level instantly). Every level below
+# (party average - CATCHUP_MARGIN) costs 1/CATCHUP_FACTOR of the EXP; the threshold level and
+# above are untouched. No ramp back to vanilla: a ramp charges the saved EXP back on the
+# levels just below the threshold (2-3x vanilla each - a traveler 5-10 levels behind levelled
+# SLOWER than the party). Instead the whole difference sits in the one step to the threshold,
+# and since the threshold follows the party (rebuilt when it levels), a traveler below it
+# snaps up to one level under it and keeps pace about CATCHUP_MARGIN + 1 levels behind.
 CATCHUP_LEVELING = True
 CATCHUP_FACTOR = 5
-CATCHUP_MARGIN = 5
-CATCHUP_RAMP = 8
+CATCHUP_MARGIN = 4
 GROW = "Octopath_Traveler/Content/Character/Database/CharacterGrowData"
 
 # Steal odds come from level-difference thresholds: STEAL_PROBABILITY_LEVEL_OVER (2 / 4 / 11
@@ -1068,10 +1070,7 @@ def build(out_path=None, save_path=None, verbose=True, pack=True):
         threshold = party_lv - CATCHUP_MARGIN
 
         def factor(level):
-            if level >= threshold:
-                return 1.0
-            frac = (threshold - level) / CATCHUP_RAMP
-            return 1.0 - min(1.0, frac) * (1.0 - 1.0 / CATCHUP_FACTOR)
+            return 1.0 if level >= threshold else 1.0 / CATCHUP_FACTOR
         new_tot = [int(round(t * factor(L))) for t, L in zip(tot, lv)]
         assert all(b > a for a, b in zip(new_tot, new_tot[1:])), "EXP table not increasing"
         gexp = set()
@@ -1092,7 +1091,7 @@ def build(out_path=None, save_path=None, verbose=True, pack=True):
         if verbose:
             cheap = [L for L, a, b in zip(lv, tot, new_tot) if b < a]
             print(f"catch-up leveling: levels {min(cheap) if cheap else '-'}-"
-                  f"{max(cheap) if cheap else '-'} cost up to {CATCHUP_FACTOR}x less EXP; "
+                  f"{max(cheap) if cheap else '-'} cost {CATCHUP_FACTOR}x less EXP; "
                   f"level {threshold}+ unchanged (party average {party_lv})")
 
     # ---------------- Tressa's Collect talent ----------------

@@ -102,8 +102,9 @@ the shortcut at the new version. You can then delete the old `OctopathWorldOverh
   towns). Places you've never been stay locked.
 - **Fewer random encounters**: Evasive Maneuvers is built in, so you get the support-skill
   slot back.
-- **Catch-up leveling**: travelers more than 5 levels below your party level up about
-  5× faster, so late recruits catch up without grinding.
+- **Catch-up leveling**: every level more than 4 below your party's average costs 5× less
+  EXP, so a late recruit or a benched traveler shoots up to about 5 levels under the party
+  and then keeps pace with it, without grinding.
 - **Higher caps**: stats 9,999 (from 999), HP 99,999 (from 9,999), damage 999,999.
 
 All of these can be switched off individually.
