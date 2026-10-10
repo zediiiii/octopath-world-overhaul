@@ -56,7 +56,7 @@ The whole journey stays a real fight — from the first chapter to the last boss
 [*]Fast travel to every location you've visited (unvisited places stay locked).
 [*]Evasive Maneuvers built in — half the random encounters, one support-skill slot freed.
 [*][b]Toggle dash[/b] (optional, toggle_dash = true): press dash once to run, again to walk. A small patch to the game's own controller — no script loader needed.
-[*]Catch-up leveling: every level more than 4 below your party's average costs 5× less EXP, so late recruits and benched travelers shoot up to about 5 levels under the party and keep pace from there.
+[*]Catch-up leveling: off in the vanilla opening, then phasing in with the rest of the world, up to 5× cheaper EXP for every level more than 4 below your party's average — benched travelers shoot up to about 5 levels under the party and keep pace from there.
 [/list]
 
 [size=5][b]Presets[/b][/size]

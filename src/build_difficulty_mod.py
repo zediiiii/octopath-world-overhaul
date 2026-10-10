@@ -382,6 +382,17 @@ def settings_at(stage, ramp=None):
     return out
 
 
+def catchup_divisor():
+    """How many times cheaper catch-up makes the low levels: 1 (off) through the vanilla
+    opening, rising with the stage ramp to CATCHUP_FACTOR when the world reaches full
+    strength - it only matters once the world is scaled to the party. No ramp = full."""
+    if not RAMP or not STAGE:
+        return float(CATCHUP_FACTOR)
+    s0, s1 = RAMP[0][0], RAMP[1][0]
+    w = max(0.0, min(1.0, (STAGE[0] - s0) / (s1 - s0)))
+    return 1.0 + (CATCHUP_FACTOR - 1) * w
+
+
 def apply_settings(s):
     global PROGRESS_MARGIN, PARTY_MARGIN, LEGACY_FLOOR, BOSS_HP_MULT, SUPERBOSS_HP_MULT
     global ENEMY_LEVEL_WEIGHT, SET_ENEMY_LEVEL, STEAL_LEVEL_SHIFT, HARD_AREA_DISPLAY
@@ -1052,7 +1063,10 @@ def build(out_path=None, save_path=None, verbose=True, pack=True):
 
     # ---------------- catch-up leveling (CharacterGrowData) ----------------
     files_grow = {}
-    if CATCHUP_LEVELING:
+    cheapen = catchup_divisor()
+    if CATCHUP_LEVELING and cheapen <= 1.0 and verbose:
+        print("catch-up leveling: off during the vanilla opening (levels cost as shipped)")
+    if CATCHUP_LEVELING and cheapen > 1.0:
         # Built on the copy the game would otherwise load: Larger Monster Roster, for one,
         # raises H'aanit's capture limit (FCParameter.TameCount) in this same table.
         gua, gue_in, grow_src = paths.installed_asset(GROW, p)
@@ -1070,7 +1084,7 @@ def build(out_path=None, save_path=None, verbose=True, pack=True):
         threshold = party_lv - CATCHUP_MARGIN
 
         def factor(level):
-            return 1.0 if level >= threshold else 1.0 / CATCHUP_FACTOR
+            return 1.0 if level >= threshold else 1.0 / cheapen
         new_tot = [int(round(t * factor(L))) for t, L in zip(tot, lv)]
         assert all(b > a for a, b in zip(new_tot, new_tot[1:])), "EXP table not increasing"
         gexp = set()
@@ -1091,7 +1105,7 @@ def build(out_path=None, save_path=None, verbose=True, pack=True):
         if verbose:
             cheap = [L for L, a, b in zip(lv, tot, new_tot) if b < a]
             print(f"catch-up leveling: levels {min(cheap) if cheap else '-'}-"
-                  f"{max(cheap) if cheap else '-'} cost {CATCHUP_FACTOR}x less EXP; "
+                  f"{max(cheap) if cheap else '-'} cost {cheapen:.2g}x less EXP; "
                   f"level {threshold}+ unchanged (party average {party_lv})")
 
     # ---------------- Tressa's Collect talent ----------------

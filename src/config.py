@@ -70,7 +70,7 @@ FEATURES = {
     "fewer_encounters": True,     # Evasive Maneuvers baked in (x2 steps between fights)
     "raise_damage_cap": True,     # 999,999 instead of 9,999
     "raise_stat_caps": True,      # stats 9,999 and HP 99,999 instead of 999 / 9,999
-    "catch_up_leveling": True,    # under-levelled travelers level ~5x faster
+    "catch_up_leveling": True,    # benched travelers level up to 5x cheaper (mid game on)
     "scale_summons": True,        # H'aanit's captured beasts keep pace
     "scale_tressa_collect": True,
     "consumable_upgrades": True,  # high-value consumable drops / steals late game

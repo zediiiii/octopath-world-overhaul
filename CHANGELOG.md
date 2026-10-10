@@ -8,6 +8,9 @@
   the party. Now every level more than 4 below the party average is 5x cheaper, with no
   payback zone: travelers below that line jump to about 5 levels under the party after their
   next battle and keep pace as the party levels. The party's own levels are unchanged.
+- **Catch-up leveling now follows the vanilla start:** off through the chapter 1s (levels
+  cost exactly as shipped), phasing in with the rest of the world to full strength (5x) by
+  the time the world is fully scaled to your party.
 
 ## 1.0.0-beta.4
 
