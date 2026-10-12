@@ -259,18 +259,19 @@ COMPLETION_WEIGHTS = {"chapters": 0.50, "side_stories": 0.20, "optional_bosses":
                       "areas": 0.10}
 COMPLETION_FLOOR = 0.0    # 0..1, how much of the completion floor applies (set per stage)
 SUB_MISSIONS = "Octopath_Traveler/Content/Mission/Database/Sub_MissionRecord"
-# VisitedMap bits seen up to 193 in a 27-chapter save; the exact number of reachable maps
-# isn't in the data, so areas count against this and cap at 100%
-AREA_TOTAL = 190
-# optional bosses, grouped into one fight each: shrine gods, rematches, optional beasts and
-# Galdera (all of BOS_Lst_* is the one two-phase fight). A bestiary entry counts as fought;
-# EnemyIDs that other rows share are ignored (three of Galdera's hands reuse Olberic's
-# chapter 1-2 boss IDs, which made Galdera look fought).
+# Areas are the world map's 147 locations (WorldMapTable, without the 10 leftover demo rows
+# that repeat Cobbleston / Sunshade); one counts as explored when the save's VisitedMap has
+# any of its levels (a bit per level ID). All 147 are real places, so 100% is reachable.
+WORLD_MAP = "Octopath_Traveler/Content/Level/Database/WorldMapTable"
+WORLD_MAP_DEMO_ROWS = 10
+# optional bosses, grouped into one fight each: the four shrine gods, the eight revived bosses
+# of the Gate of Finis and the side-story beasts (Jotunn, Leviathan ...). A bestiary entry
+# counts as fought; EnemyIDs that other rows share are ignored. Galdera is not counted: the
+# game ends after that fight, so no save can record it and 100% would be unreachable.
 OPTIONAL_BOSS_GROUP = (
     (re.compile(r"BOS_Ext_Job_(\d{3})"), "shrine {}"),
     (re.compile(r"BOS_Ext_Rev_\d(\d{2})"), "rematch {}"),
     (re.compile(r"EVE_EXT_(\d{3})_"), "beast {}"),
-    (re.compile(r"BOS_Lst_"), "galdera"),
 )
 # The game's hardest fight. Relentless pins it at a fixed danger (FINAL_BOSS_DANGER, from
 # config) instead of the world's, so there is always a peak to work toward.
@@ -285,8 +286,8 @@ LAST_COMPLETION = None    # completion() of the save the last build() was made f
 
 
 def _completion_data():
-    """(({area: [(slot, story)]}, number of side stories), {boss group: [EnemyID]}) from the
-    game data, cached. Only the 101 real side stories count (see side_stories.py): counting
+    """(({area: [(slot, story)]}, number of side stories), {boss group: [EnemyID]},
+    [level IDs of each world-map location]) from the game data, cached. Only the 101 real side stories count (see side_stories.py): counting
     all 144 records made full completion - and the Wayfarer's Laurel - unreachable."""
     if not _COMPLETION_DATA:
         import side_stories
@@ -305,7 +306,14 @@ def _completion_data():
                 if m:
                     groups.setdefault(label.format(*m.groups()), []).append(g(v, "EnemyID"))
                     break
-        _COMPLETION_DATA.update(per_area=per_area, groups=groups)
+        wmap = uasset.read_datatable(p.read(WORLD_MAP + ".uasset"), p.read(WORLD_MAP + ".uexp"))
+        places = []
+        for v in list(wmap.values())[WORLD_MAP_DEMO_ROWS:]:
+            ids = {int(x) for x in list(g(v, "RefLevelName")) + [g(v, "MoveLevelName")]
+                   if x and x != "None"}
+            if ids:
+                places.append(ids)
+        _COMPLETION_DATA.update(per_area=per_area, groups=groups, places=places)
     return _COMPLETION_DATA["per_area"], _COMPLETION_DATA["groups"]
 
 
@@ -324,11 +332,14 @@ def completion(save_path):
     info = s.get("EnemyInfoData").value
     fought = lambda i: 0 <= i < len(info) and any(q.value for q in info[i])
     bosses = sum(1 for ids in groups.values() if any(fought(i) for i in ids))
-    areas = sum(bin(x & 0xffffffff).count("1") for x in s.get("VisitedMap").value)
+    places = _COMPLETION_DATA["places"]
+    vm = s.get("VisitedMap").value
+    seen = lambda i: i // 32 < len(vm) and (vm[i // 32] >> (i % 32)) & 1
+    areas = sum(1 for ids in places if any(seen(i) for i in ids))
     out = dict(chapters=chapters_done(s), side_stories=side, optional_bosses=bosses,
                areas=areas)
     totals = dict(chapters=32, side_stories=side_total,
-                  optional_bosses=len(groups), areas=AREA_TOTAL)
+                  optional_bosses=len(groups), areas=len(places))
     out["share"] = sum(w * min(1.0, out[k] / totals[k]) for k, w in COMPLETION_WEIGHTS.items())
     out["totals"] = totals
     return out

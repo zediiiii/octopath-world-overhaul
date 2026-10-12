@@ -10,6 +10,11 @@
   records, but 32 are blank, 4 are never used and "Kit, the Traveler" is eight records for
   one story. The Wayfarer's Laurel (sold when every side story is done) could never appear,
   and relentless's completion counted side stories as less done than they were.
+- **Fixed: 100% completion was out of reach.** Areas are now the world map's 147 real
+  locations (was a guessed 190 map pieces, more than exist), and Galdera no longer counts as
+  an optional boss (the game ends after that fight, so no save can record it). Every part
+  - 32 chapters, 101 side stories, 18 optional bosses, 147 locations - can now reach 100%,
+  which takes relentless's world to danger 104.
 
 ## 1.0.0-beta.5
 
