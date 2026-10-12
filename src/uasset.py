@@ -78,7 +78,10 @@ class DTReader:
             self.p = st + size; return vals
         self.u8(); st = self.p
         v = self.body_scalar(typ, size)
-        self.p = st + size
+        if not (typ == 'TextProperty' and v is not None):
+            # a plain FText is self-delimiting; Side Stories Helper's table stores a tag size
+            # 10 bytes short on its edited rows, so trust the content, as the game does
+            self.p = st + size
         return v
     def body_scalar(self, typ, size=None):
         if typ == 'IntProperty': return self.i32()

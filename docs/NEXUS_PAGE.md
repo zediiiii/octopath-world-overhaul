@@ -2,7 +2,7 @@
 
 **Name:** Orsterra Unbound - World Overhaul
 **Category:** Overhauls
-**Version:** 1.0.0-beta.5
+**Version:** 1.0.0-beta.6
 **Short description (350 chars max):** Vanilla chapter 1s, then a world that keeps up: enemies
 and bosses scale with your story and party, 560+ new multi-stat items up to level 104, stats past
 999, elemental boosts that work on accessories, fast travel to visited places, half the random
@@ -41,7 +41,7 @@ The whole journey stays a real fight — from the first chapter to the last boss
 [*]Big SP and %HP restoratives; late in the game ordinary drops and steals become Revitalizing Jam and friends.
 [*]Gear you already own is never changed. New gear sells back for half its price, so you can try it on.
 [*][b]Fortune's Purse[/b]: triple JP and battle money (the best JP/money item worn counts; they don't stack).
-[*][b]Wayfarer's Laurel[/b]: appears in Grandport once you've finished every side story — +1,500 to every stat, regeneration, more EXP, JP and money.
+[*][b]Wayfarer's Laurel[/b]: appears in Grandport once you've finished all 101 side stories — +1,500 to every stat, regeneration, more EXP, JP and money.
 [*][b]Unbound Crown[/b]: +3,000 to every stat, dropped by Galdera.
 [/list]
 
@@ -53,6 +53,7 @@ The whole journey stays a real fight — from the first chapter to the last boss
 
 [size=5][b]Quality of life[/b][/size]
 [list]
+[*][b]Side-story journal hints[/b]: every side story's journal entry gains a "Finish at:" line — who you hand it in to, and where (e.g. Finish at: Sweet Tooth, Wellspring) — read from the game's own event data. Pairs with fast travel; Side Stories Helper's hints are kept.
 [*]Fast travel to every location you've visited (unvisited places stay locked).
 [*]Evasive Maneuvers built in — half the random encounters, one support-skill slot freed.
 [*][b]Toggle dash[/b] (optional, toggle_dash = true): press dash once to run, again to walk. A small patch to the game's own controller — no script loader needed.
@@ -84,7 +85,7 @@ From then on, just press Play. The world is rebuilt from your save whenever your
 Thanks to these mods — Orsterra Unbound is built to work alongside them:
 [list]
 [*][url=https://www.nexusmods.com/octopathtraveler/mods/16]Better Descriptions[/url] — the new items' descriptions follow its wording conventions, and its text is kept: new item text is added on top of it.
-[*][url=https://www.nexusmods.com/octopathtraveler/mods/21]Side Stories Helper[/url] — its text is kept the same way.
+[*][url=https://www.nexusmods.com/octopathtraveler/mods/21]Side Stories Helper[/url] — its text is kept the same way, with the journal's "Finish at:" lines added after its hints.
 [*][url=https://www.nexusmods.com/octopathtraveler/mods/22]Larger Monster Roster[/url] — H'aanit's larger capture roster is kept: catch-up leveling is built on top of its table.
 [*][url=https://www.nexusmods.com/octopathtraveler/mods/41]Long Distance Banter[/url] and [url=https://www.nexusmods.com/octopathtraveler/mods/58]Our Purple Chests[/url] — tested together, no overlap.
 [/list]

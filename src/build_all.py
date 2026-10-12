@@ -47,6 +47,7 @@ NEW_GEAR = True
 FAST_TRAVEL = True
 CONSUMABLE_UPGRADES = True
 TOGGLE_DASH = False        # overhaul.ini [features] toggle_dash
+JOURNAL_HINTS = True       # overhaul.ini [features] journal_hints (side_stories.py)
 CAP_TEST_IN_SHOP = False
 
 # The final boss's prize (user 2026-10-04): +3000 to every stat, dropped by Galdera on
@@ -217,6 +218,10 @@ def main(out_path=None, install=False):
     print(f"item IDs {min(m['id'] for m in minted)}-{max(m['id'] for m in minted)} "
           f"(stable across rebuilds, see {os.path.basename(make_gear.REGISTRY)})")
     iua, iue = dt.append_rows(forge.item_ua, forge.item_ue, forge.new_items)
+    if JOURNAL_HINTS:
+        import side_stories
+        forge.text_ua, forge.text_ue = side_stories.add_where(forge.text_ua, forge.text_ue,
+                                                             log=print)
     tua, tue = dt.append_rows(forge.text_ua, forge.text_ue, forge.new_texts)
     dt.verify(iua, iue)
     dt.verify(tua, tue)

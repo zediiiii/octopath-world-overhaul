@@ -96,8 +96,12 @@ def build_text_row(names, row_idx, row_num, key_hex, text):
     payload += struct.pack("<i", 0)                     # namespace: empty
     kb = key_hex.encode("latin-1") + b"\x00"
     payload += struct.pack("<i", len(kb)) + kb          # key
-    sb = text.encode("latin-1") + b"\x00"
-    payload += struct.pack("<i", len(sb)) + sb          # source string
+    try:
+        sb = text.encode("latin-1") + b"\x00"
+        payload += struct.pack("<i", len(sb)) + sb      # source string
+    except UnicodeEncodeError:                          # e.g. the leaf symbol: UTF-16,
+        sb = text.encode("utf-16-le") + b"\x00\x00"     # stored with a negative length
+        payload += struct.pack("<i", -(len(sb) // 2)) + sb
     body += struct.pack("<ii", len(payload), 0)         # size, index
     body += b"\x00"                                     # has-guid
     body += payload
@@ -227,6 +231,23 @@ def replace_row(ua, ue, row_name, new_row):
         raise RuntimeError(f"row {row_name} not found")
     _nm, _i, _n, s, e = spans[row_name]
     out = bytearray(ue[:s]) + bytearray(new_row) + bytearray(ue[e:])
+    ua = bytearray(ua)
+    _eo, so = _export_offset(bytes(ua))
+    struct.pack_into("<q", ua, so, len(out) - 4)
+    return bytes(ua), bytes(out)
+
+
+def replace_rows(ua, ue, new_rows):
+    """replace_row for many rows at once: {row name: row bytes} (one parse of the table)."""
+    spans = {s[0]: s for s in row_spans(ua, ue)}
+    missing = [k for k in new_rows if k not in spans]
+    if missing:
+        raise RuntimeError(f"rows not found: {missing[:5]}")
+    out, last = bytearray(), 0
+    for _nm, _i, _n, s, e in sorted((spans[k] for k in new_rows), key=lambda x: x[3]):
+        out += ue[last:s] + new_rows[_nm]
+        last = e
+    out += ue[last:]
     ua = bytearray(ua)
     _eo, so = _export_offset(bytes(ua))
     struct.pack_into("<q", ua, so, len(out) - 4)

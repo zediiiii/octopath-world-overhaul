@@ -285,14 +285,13 @@ LAST_COMPLETION = None    # completion() of the save the last build() was made f
 
 
 def _completion_data():
-    """(records per side-story area, {boss group: [EnemyID]}) from the game data, cached."""
+    """(({area: [(slot, story)]}, number of side stories), {boss group: [EnemyID]}) from the
+    game data, cached. Only the 101 real side stories count (see side_stories.py): counting
+    all 144 records made full completion - and the Wayfarer's Laurel - unreachable."""
     if not _COMPLETION_DATA:
+        import side_stories
         p = pak.Pak(paths.base_pak())
-        rec = uasset.read_datatable(p.read(SUB_MISSIONS + ".uasset"), p.read(SUB_MISSIONS + ".uexp"))
-        per_area = {}
-        for v in rec.values():
-            a = g(v, "AreaIndex")
-            per_area[a] = per_area.get(a, 0) + 1
+        per_area = side_stories.slots()
         rows = uasset.read_datatable(p.read(ENEMY + ".uasset"), p.read(ENEMY + ".uexp"))
         uses = {}
         for v in rows.values():
@@ -316,17 +315,19 @@ def completion(save_path):
         return dict(share=0.0, chapters=0, side_stories=0, optional_bosses=0, areas=0)
     s = gvas.SaveFile.load(save_path)
     per_area, groups = _completion_data()
-    side = 0
+    slots, side_total = per_area
+    done = set()
     for a, grp in enumerate(s.get("SubMissionData").value):
         states = {q.name.split("_")[0]: q.value for q in grp}["MissionState"]
-        side += sum(1 for x in states[:per_area.get(a, 0)] if x == 2)
+        done |= {story for pos, story in slots.get(a, ()) if pos < len(states) and states[pos] == 2}
+    side = len(done)
     info = s.get("EnemyInfoData").value
     fought = lambda i: 0 <= i < len(info) and any(q.value for q in info[i])
     bosses = sum(1 for ids in groups.values() if any(fought(i) for i in ids))
     areas = sum(bin(x & 0xffffffff).count("1") for x in s.get("VisitedMap").value)
     out = dict(chapters=chapters_done(s), side_stories=side, optional_bosses=bosses,
                areas=areas)
-    totals = dict(chapters=32, side_stories=sum(per_area.values()),
+    totals = dict(chapters=32, side_stories=side_total,
                   optional_bosses=len(groups), areas=AREA_TOTAL)
     out["share"] = sum(w * min(1.0, out[k] / totals[k]) for k, w in COMPLETION_WEIGHTS.items())
     out["totals"] = totals

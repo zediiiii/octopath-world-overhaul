@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.0-beta.6
+
+- **Side-story journal hints:** every side story's journal entry gains a "Finish at:" line
+  naming who you hand it in to and where, read from the game's event and NPC placement data
+  (75 of 101 entries; the rest already name their place). Built on Side Stories Helper's
+  text when it is installed. `journal_hints` in overhaul.ini.
+- **Fixed: side stories were counted out of 144 instead of 101.** The game's table has 144
+  records, but 32 are blank, 4 are never used and "Kit, the Traveler" is eight records for
+  one story. The Wayfarer's Laurel (sold when every side story is done) could never appear,
+  and relentless's completion counted side stories as less done than they were.
+
 ## 1.0.0-beta.5
 
 - **Fixed: catch-up leveling stalled 5-10 levels below the party.** It made low levels 5x

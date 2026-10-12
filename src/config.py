@@ -75,6 +75,7 @@ FEATURES = {
     "scale_tressa_collect": True,
     "consumable_upgrades": True,  # high-value consumable drops / steals late game
     "toggle_dash": False,         # dash button toggles running instead of hold-to-run
+    "journal_hints": True,        # side-story journal entries say where they finish
 }
 
 DEFAULT_INI = """\
@@ -114,6 +115,8 @@ scale_tressa_collect = true
 consumable_upgrades = true
 ; press dash once to run, again to walk (instead of holding the button)
 toggle_dash = false
+; side-story journal entries get a "Finish at:" line (who and where the story ends)
+journal_hints = true
 
 [tuning]
 ; true = the chapter 1s play as vanilla and the preset's values below build up through
@@ -223,6 +226,7 @@ def apply(cfg):
     build_all.FAST_TRAVEL = f["fast_travel"]
     build_all.CONSUMABLE_UPGRADES = f["consumable_upgrades"]
     build_all.TOGGLE_DASH = f["toggle_dash"]
+    build_all.JOURNAL_HINTS = f["journal_hints"]
     build_all.CAP_TEST_ITEM = cfg["cap_test_charm"]
     return cfg
 
