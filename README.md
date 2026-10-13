@@ -98,10 +98,11 @@ the shortcut at the new version. You can then delete the old `OctopathWorldOverh
 - **Toggle dash** (optional, `toggle_dash = true` in `overhaul.ini`): press the dash button
   once to run and again to walk, instead of holding it. A small patch to the game's own
   controller; no script loader needed.
-- **Side-story journal hints**: each side story's journal entry gains a "Finish at:" line
-  naming who you hand it in to and where (e.g. *Finish at: Sweet Tooth, Wellspring*), read
-  from the game's own event data - pair it with fast travel. Works on top of *Side Stories
-  Helper* (its text is kept; entries that already name the place are left alone).
+- **Side-story walkthroughs in the journal**: each side story's journal entry lists every
+  step with the town *and region*: who starts it, who to ask around, where to get each item
+  or piece of information (who to Purchase/Steal or Inquire/Scrutinize), the steps on the
+  way, every way to finish it and the reward. Read from the game's own event, NPC and shop
+  data - pair it with fast travel. Also as one document: [docs/SIDE_STORIES.md](docs/SIDE_STORIES.md).
 - **Fast travel to every location you have visited** (dungeons, caves, shrines — not just
   towns). Places you've never been stay locked.
 - **Fewer random encounters**: Evasive Maneuvers is built in, so you get the support-skill
@@ -146,8 +147,9 @@ Built to work alongside, with thanks:
 - [Better Descriptions](https://www.nexusmods.com/octopathtraveler/mods/16) — the new items'
   descriptions follow its wording conventions, and its text is kept (new text is added on
   top of it).
-- [Side Stories Helper](https://www.nexusmods.com/octopathtraveler/mods/21) — text kept; the
-  journal's "Finish at:" lines are added after its hints.
+- [Side Stories Helper](https://www.nexusmods.com/octopathtraveler/mods/21) — its other text
+  is kept; its side-story journal hints are replaced by the full walkthroughs (which cover
+  the same solutions, plus where everyone is).
 - [Larger Monster Roster](https://www.nexusmods.com/octopathtraveler/mods/22) — H'aanit's
   larger roster is kept: catch-up leveling is built on top of its `CharacterGrowData`.
 - [Long Distance Banter](https://www.nexusmods.com/octopathtraveler/mods/41) and

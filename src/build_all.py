@@ -220,7 +220,7 @@ def main(out_path=None, install=False):
     iua, iue = dt.append_rows(forge.item_ua, forge.item_ue, forge.new_items)
     if JOURNAL_HINTS:
         import side_stories
-        forge.text_ua, forge.text_ue = side_stories.add_where(forge.text_ua, forge.text_ue,
+        forge.text_ua, forge.text_ue = side_stories.add_walkthroughs(forge.text_ua, forge.text_ue,
                                                              log=print)
     tua, tue = dt.append_rows(forge.text_ua, forge.text_ue, forge.new_texts)
     dt.verify(iua, iue)

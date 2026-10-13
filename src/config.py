@@ -75,7 +75,7 @@ FEATURES = {
     "scale_tressa_collect": True,
     "consumable_upgrades": True,  # high-value consumable drops / steals late game
     "toggle_dash": False,         # dash button toggles running instead of hold-to-run
-    "journal_hints": True,        # side-story journal entries say where they finish
+    "journal_hints": True,        # side-story journal entries: step-by-step walkthroughs
 }
 
 DEFAULT_INI = """\
@@ -115,7 +115,7 @@ scale_tressa_collect = true
 consumable_upgrades = true
 ; press dash once to run, again to walk (instead of holding the button)
 toggle_dash = false
-; side-story journal entries get a "Finish at:" line (who and where the story ends)
+; side-story journal entries become step-by-step walkthroughs (who, where, region)
 journal_hints = true
 
 [tuning]

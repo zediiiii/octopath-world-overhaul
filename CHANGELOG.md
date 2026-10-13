@@ -2,10 +2,13 @@
 
 ## 1.0.0-beta.6
 
-- **Side-story journal hints:** every side story's journal entry gains a "Finish at:" line
-  naming who you hand it in to and where, read from the game's event and NPC placement data
-  (75 of 101 entries; the rest already name their place). Built on Side Stories Helper's
-  text when it is installed. `journal_hints` in overhaul.ini.
+- **Side-story walkthroughs in the journal:** every side story's journal entry lists each
+  step with town and region: who starts it, who to ask around, who has each item or piece
+  of information (and whether to Purchase/Steal or Inquire/Scrutinize), the steps on the way,
+  every way to finish it and the reward. Read from the game's event scripts, NPC
+  placements, shop and inquire lists. Replaces Side Stories Helper's journal hints (same
+  solutions, plus places). `journal_hints` in overhaul.ini; all 101 also in
+  docs/SIDE_STORIES.md.
 - **Fixed: side stories were counted out of 144 instead of 101.** The game's table has 144
   records, but 32 are blank, 4 are never used and "Kit, the Traveler" is eight records for
   one story. The Wayfarer's Laurel (sold when every side story is done) could never appear,

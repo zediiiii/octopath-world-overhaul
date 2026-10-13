@@ -53,7 +53,7 @@ The whole journey stays a real fight — from the first chapter to the last boss
 
 [size=5][b]Quality of life[/b][/size]
 [list]
-[*][b]Side-story journal hints[/b]: every side story's journal entry gains a "Finish at:" line — who you hand it in to, and where (e.g. Finish at: Sweet Tooth, Wellspring) — read from the game's own event data. Pairs with fast travel; Side Stories Helper's hints are kept.
+[*][b]Side-story walkthroughs in the journal[/b]: every side story's journal entry lists each step with the town and region — who starts it, who to ask around, who to Purchase/Steal an item from or Inquire/Scrutinize for information, every way to finish it, and the reward. Read from the game's own event, NPC and shop data; pairs with fast travel.
 [*]Fast travel to every location you've visited (unvisited places stay locked).
 [*]Evasive Maneuvers built in — half the random encounters, one support-skill slot freed.
 [*][b]Toggle dash[/b] (optional, toggle_dash = true): press dash once to run, again to walk. A small patch to the game's own controller — no script loader needed.
@@ -85,7 +85,7 @@ From then on, just press Play. The world is rebuilt from your save whenever your
 Thanks to these mods — Orsterra Unbound is built to work alongside them:
 [list]
 [*][url=https://www.nexusmods.com/octopathtraveler/mods/16]Better Descriptions[/url] — the new items' descriptions follow its wording conventions, and its text is kept: new item text is added on top of it.
-[*][url=https://www.nexusmods.com/octopathtraveler/mods/21]Side Stories Helper[/url] — its text is kept the same way, with the journal's "Finish at:" lines added after its hints.
+[*][url=https://www.nexusmods.com/octopathtraveler/mods/21]Side Stories Helper[/url] — its text is kept the same way; its side-story journal hints are replaced by the full walkthroughs, which cover the same solutions plus where everyone is.
 [*][url=https://www.nexusmods.com/octopathtraveler/mods/22]Larger Monster Roster[/url] — H'aanit's larger capture roster is kept: catch-up leveling is built on top of its table.
 [*][url=https://www.nexusmods.com/octopathtraveler/mods/41]Long Distance Banter[/url] and [url=https://www.nexusmods.com/octopathtraveler/mods/58]Our Purple Chests[/url] — tested together, no overlap.
 [/list]
