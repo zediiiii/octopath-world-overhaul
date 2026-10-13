@@ -14,6 +14,7 @@ Design notes that the numbers come from (see balance.py):
   * Gear is all brand-new rows. Nothing you already own changes.
 """
 import paths
+import collections
 import os
 import random
 import struct
@@ -81,15 +82,25 @@ CONSUMABLE_SELL_RATIO = 0.1
 # A tier is only sold - or dropped - once the world is within this many danger points of it.
 # It was 10, which let tier 60 be bought at danger 50 where it is ~1.5x too strong.
 LOOKAHEAD = 5
-# From this danger on, random enemies that drop an ordinary consumable drop (and can be
-# stolen from for) high-value ones instead - Revitalizing Jam, Olive of Life (L), the
-# Invigorating / Vital restores. Alfyn's concoct materials and status cures are left alone.
-CONSUMABLE_UPGRADE_FROM = 68
-CONSUMABLE_MIN_DROP = 10          # percent
-# vanilla rows (by ItemDB key) and our minted ones (by name)
-UPGRADE_POOL_LOW = ["Vital Draught", "Invigorating Draught", "ITM_010", "ITM_144"]
-UPGRADE_POOL_HIGH = ["ITM_007", "ITM_018", "Vital Cask", "Invigorating Cask", "ITM_017",
-                     "ITM_145"]
+# Loot keeps pace with the world: a random enemy's consumable drop (and what it can be robbed
+# of) climbs its ladder one rung for every UPGRADE_STEPS danger passed, so by the 60s a grape
+# drop is a Refreshing Jam and a plain soulstone an XL one. Rungs are vanilla ItemDB keys or
+# our minted items (by name); an item's rung is its first place in any ladder. Alfyn's
+# concoct materials and the status cures are left alone.
+CONSUMABLE_LADDERS = [
+    ["ITM_095", "ITM_078", "ITM_079", "Vital Draught", "ITM_007", "ITM_018"],  # HP, one ally
+    ["ITM_101", "ITM_086", "ITM_087", "Invigorating Draught", "ITM_007", "ITM_018"],  # SP
+    ["ITM_023", "ITM_078", "ITM_079", "Vital Draught", "ITM_007", "ITM_018"],  # Ali's Bread
+    ["ITM_080", "Vital Cask"],                           # HP, whole party
+    ["ITM_088", "Invigorating Cask"],                    # SP, whole party
+    ["ITM_093", "ITM_009", "ITM_010", "ITM_017"],        # revive: herb, olives
+    ["ITM_143", "ITM_144", "ITM_145", "ITM_018"],        # BP: pomegranates, then the jam
+] + [[base, m, l, f"{el} Soulstone (XL)"] for el, base, m, l in (
+    ("Fire", "ITM_028", "ITM_029", "ITM_137"), ("Ice", "ITM_030", "ITM_031", "ITM_138"),
+    ("Thunder", "ITM_032", "ITM_033", "ITM_139"), ("Wind", "ITM_034", "ITM_035", "ITM_140"),
+    ("Light", "ITM_036", "ITM_115", "ITM_141"), ("Shadow", "ITM_037", "ITM_116", "ITM_142"))]
+UPGRADE_STEPS = (35, 50, 65, 80)  # world danger at which drops climb one more rung
+CONSUMABLE_MIN_DROP = 10          # percent, for drops that have climbed 3+ rungs
 SHOP_LOOKAHEAD = LOOKAHEAD
 DROP_RATE = 1            # percent, for repeatable random encounters
 # Bosses are fought once, so a 1% roll would mean effectively never.
@@ -181,7 +192,7 @@ def main(out_path=None, install=False):
                            immune=spec.get("immune", ()),
                            sell_ratio=(CONSUMABLE_SELL_RATIO if spec["kind"] == "consumable"
                                        else GEAR_SELL_RATIO))
-        info.update(tier=spec["tier"], kind=spec["kind"])
+        info.update(tier=spec["tier"], kind=spec["kind"], gated=spec.get("gated", False))
         minted.append(info)
     if NEW_GEAR:
         info = forge.forge(catalogue.ACCESSORY_TEMPLATE, LAUREL_NAME,
@@ -343,47 +354,49 @@ def main(out_path=None, install=False):
               f"fixed at danger {B.FINAL_BOSS_DANGER}")
     print(f"drop tiers open at danger {floor}: {open_tiers or 'none yet (vanilla drops kept)'}")
     print(f"drops: {kept_unique} enemies keep a unique vanilla drop (not sold anywhere)")
-    # ---- high-value consumables at danger CONSUMABLE_UPGRADE_FROM+ ----
-    upgraded = 0
-    if CONSUMABLE_UPGRADES and floor >= CONSUMABLE_UPGRADE_FROM:
-        base_items = uasset.read_datatable(bp.read(make_gear.ITEMS + ".uasset"),
-                                           bp.read(make_gear.ITEMS + ".uexp"))
+    # ---- consumable drops climb their ladders as the world grows (CONSUMABLE_LADDERS) ----
+    climb = sum(1 for d in UPGRADE_STEPS if floor >= d)
+    upgraded = collections.Counter()
+    if CONSUMABLE_UPGRADES and climb:
         minted_by_name = {m["name"]: m for m in minted}
+        rung = {}
+        for ladder in CONSUMABLE_LADDERS:
+            for n, item in enumerate(ladder):
+                rung.setdefault(item, (ladder, n))
+
+        def available(item):
+            """Minted rungs only once their tier is open (the XL soulstones from 70)."""
+            m = minted_by_name.get(item)
+            return m is None or m["tier"] <= floor + LOOKAHEAD or not m.get("gated")
 
         def ref(key):
-            """-> (EnemyDB name index, FName number) for a pool entry."""
+            """-> (EnemyDB name index, FName number) for a ladder rung."""
             nonlocal eua, enames
             if key in minted_by_name:
                 return enames.index(make_gear.ROW_ANCHOR), minted_by_name[key]["row_num"]
-            if key not in base_items:
-                raise RuntimeError(f"upgrade pool item {key} not in ItemDB")
             if key not in enames:
                 eua = dt.add_names(eua, [key])
                 enames, _ = uasset.names_of(eua)
             return enames.index(key), 0
-
-        def ordinary(item):
-            if item in ("None", "") or item not in sold or item.startswith("ITM_MB_"):
-                return False
-            ails = [g(a, "AilmentName") for a in g(base_items[item], "Ailment")]
-            return not any(a.startswith("REMOVE_") for a in ails)
         cur = uasset.read_datatable(eua, bytes(eue))
-        cands = sorted((g(g(base_rows[k], "Param"), "HP"), i, k) for i, k in enumerate(ekeys)
-                       if cls[k] == "random"
-                       and g(cur[k], "HaveItemID") == g(base_rows[k], "HaveItemID")
-                       and ordinary(g(base_rows[k], "HaveItemID")))
-        low = [ref(x) for x in UPGRADE_POOL_LOW]
-        high = [ref(x) for x in UPGRADE_POOL_HIGH]
-        for rank, (_hp, i, _k) in enumerate(cands):
-            idx, num = rng.choice(high if rank >= len(cands) // 2 else low)
-            dt.set_fname(eue, have_offs[i], idx, num)
+        for i, k in enumerate(ekeys):
+            have = g(base_rows[k], "HaveItemID")
+            if cls[k] != "random" or have not in rung or g(cur[k], "HaveItemID") != have:
+                continue                    # bosses, NPCs, rows given tier gear, other items
+            ladder, n = rung[have]
+            top = n + climb
+            while top > n and (top >= len(ladder) or not available(ladder[top])):
+                top -= 1
+            if top == n:
+                continue
+            dt.set_fname(eue, have_offs[i], *ref(ladder[top]))
             o = prob_offs[i]
-            if struct.unpack_from("<i", eue, o)[0] < CONSUMABLE_MIN_DROP:
+            if top - n >= 3 and struct.unpack_from("<i", eue, o)[0] < CONSUMABLE_MIN_DROP:
                 struct.pack_into("<i", eue, o, CONSUMABLE_MIN_DROP)
-            upgraded += 1
+            upgraded[ladder[top]] += 1
         files[B.ENEMY + ".uasset"] = eua
-        print(f"danger {floor} >= {CONSUMABLE_UPGRADE_FROM}: {upgraded} enemies now drop / "
-              f"can be robbed of high-value consumables (min {CONSUMABLE_MIN_DROP}% drop)")
+        print(f"consumable drops climb {climb} rung(s) at danger {floor}: "
+              f"{sum(upgraded.values())} enemies now drop / can be robbed of better items")
     files[B.ENEMY + ".uexp"] = bytes(eue)
     uasset.read_datatable(eua, bytes(eue))      # must still parse
     print(f"rare drops: {drops - boss_drops} enemies at {DROP_RATE}%, "
@@ -410,7 +423,8 @@ def main(out_path=None, install=False):
     plan = [(GRANDPORT_WEAPONS, "Sea_L_A_SHOP_w_01",
              [m for m in minted if m["kind"] in ("weapon", "armour") and stocked(m)]),
             (GRANDPORT_ITEMS, "Sea_L_A_SHOP_i_01",
-             [m for m in minted if m["kind"] == "consumable"
+             [m for m in minted if (m["kind"] == "consumable"
+                                    and (not m.get("gated") or m["tier"] <= floor + SHOP_LOOKAHEAD))
               or (m["kind"] == "test" and CAP_TEST_IN_SHOP)
               or (m["kind"] == "reward" and side_all)
               or m["kind"] == "special"]

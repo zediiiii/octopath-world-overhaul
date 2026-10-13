@@ -157,6 +157,13 @@ VITAL_SINGLE_PCT = 50
 VITAL_GROUP_PCT = 35
 VITAL_SINGLE_PRICE = 6000
 VITAL_GROUP_PRICE = 18000
+# XL soulstones: one more rung above the shipped (L) ones (2,700 to all foes), for worlds
+# where foes have 20,000+ HP. Sold - and reached by drop upgrades - from tier 70.
+SOULSTONE_XL = [("Fire", "ITM_137"), ("Ice", "ITM_138"), ("Thunder", "ITM_139"),
+                ("Wind", "ITM_140"), ("Light", "ITM_141"), ("Shadow", "ITM_142")]
+SOULSTONE_XL_DAMAGE = 9000
+SOULSTONE_XL_PRICE = 20000
+SOULSTONE_XL_TIER = 70
 
 
 def accessory_points(stats):
@@ -644,4 +651,11 @@ def design(nums):
                     name="Invigorating Cask", stats={}, immune=(),
                     ailment=[("MP_FIXED_RECOVERY", SP_GROUP_AMOUNT)], price=SP_GROUP_PRICE,
                     desc=f"Restores {SP_GROUP_AMOUNT} SP to the entire party."))
+    for el, template in SOULSTONE_XL:
+        word = {"Thunder": "lightning", "Shadow": "dark"}.get(el, el.lower())
+        out.append(dict(tier=SOULSTONE_XL_TIER, kind="consumable", gated=True,
+                        template=template, name=f"{el} Soulstone (XL)", stats={}, immune=(),
+                        ailment=[("HP_FIXED_DAMAGE", SOULSTONE_XL_DAMAGE)],
+                        price=SOULSTONE_XL_PRICE,
+                        desc=f"Deals {SOULSTONE_XL_DAMAGE:,} {word} damage to all foes."))
     return out

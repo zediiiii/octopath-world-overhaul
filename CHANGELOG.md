@@ -2,6 +2,12 @@
 
 ## 1.0.0-beta.6
 
+- **Loot keeps pace with the world:** consumable drops and steals climb a ladder one rung at
+  world danger 35, 50, 65 and 80 (grapes -> Grape (M) -> Vital Draught -> Refreshing Jam ->
+  Revitalizing Jam; plums, olives, pomegranates likewise), replacing the single jump at 68.
+- **XL Soulstones** (six elements, 9,000 damage to all foes), sold and dropped from world
+  level 70.
+- Python is bundled - stated as a non-requirement.
 - **No archive inside the download:** the bundled Python standard library ships as plain
   files (runtime\Lib) instead of a zip within the zip, which Nexus treats as a nested
   archive and quarantines.

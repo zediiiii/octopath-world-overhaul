@@ -13,7 +13,7 @@ picker.png.
 
 **Files:** `OrsterraUnbound-<version>.zip` from `python dev/package_release.py` (main file).
 
-**Requirements:** none (Steam version, Windows). **Permissions:** MIT (see LICENSE).
+**Requirements:** none (Steam version, Windows 10/11; Python not needed - bundled). **Permissions:** MIT (see LICENSE).
 
 ---
 
@@ -38,7 +38,8 @@ The whole journey stays a real fight — from the first chapter to the last boss
 [*]Six tiers — Tempered, Runeforged, Astral, Sovereign, Eternal and Mythic (levels 60–104) — sold in Grandport as the world reaches them, and as rare drops (every boss drops one).
 [*]Every piece boosts several stats, and the description lists every number and how it stacks.
 [*]Weapon styles with on-hit effects, Twinfang double strikes, Gambler's crit-or-miss, Headsman's instant kills, dual-element weapons, Hallowed healer staves, a physical War Staff, status-immunity talismans, regen pendants, elemental wards, sigils and hearts.
-[*]Big SP and %HP restoratives; late in the game ordinary drops and steals become Revitalizing Jam and friends.
+[*]Big SP and %HP restoratives, and XL Soulstones from world level 70.
+[*][b]Loot keeps pace with the world:[/b] enemy drops and steals climb a rung at world danger 35, 50, 65 and 80 — grapes become Grape (M), Vital Draught, Refreshing Jam, then Revitalizing Jam; plums, olives and pomegranates climb the same way; soulstones reach (XL).
 [*]Gear you already own is never changed. New gear sells back for half its price, so you can try it on.
 [*][b]Fortune's Purse[/b]: triple JP and battle money (the best JP/money item worn counts; they don't stack).
 [*][b]Wayfarer's Laurel[/b]: appears in Grandport once you've finished all 101 side stories — +1,500 to every stat, regeneration, more EXP, JP and money.
@@ -80,7 +81,7 @@ From then on, just press Play. The world is rebuilt from your save whenever your
 [b]Uninstall:[/b] double-click Uninstall-OrsterraUnbound, then delete the folder.
 
 [size=5][b]Requirements & credits[/b][/size]
-[b]Requirements: none.[/b] Everything is built from your own game install; no other mod is needed.
+[b]Requirements: none.[/b] Everything is built from your own game install; no other mod is needed, and Python does not need to be installed (the download carries its own copy of the official python.org runtime). Windows 10 or 11, Steam version.
 
 Thanks to these mods — Orsterra Unbound is built to work alongside them:
 [list]

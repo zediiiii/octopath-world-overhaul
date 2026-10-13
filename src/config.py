@@ -73,7 +73,7 @@ FEATURES = {
     "catch_up_leveling": True,    # benched travelers level up to 5x cheaper (mid game on)
     "scale_summons": True,        # H'aanit's captured beasts keep pace
     "scale_tressa_collect": True,
-    "consumable_upgrades": True,  # high-value consumable drops / steals late game
+    "consumable_upgrades": True,  # consumable drops / steals climb with the world
     "toggle_dash": False,         # dash button toggles running instead of hold-to-run
     "journal_hints": True,        # side-story journal entries: step-by-step walkthroughs
 }

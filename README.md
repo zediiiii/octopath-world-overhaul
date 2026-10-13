@@ -87,9 +87,13 @@ the shortcut at the new version. You can then delete the old `OctopathWorldOverh
   the total multiplies with support skills and buffs. Physical damage boosts add up across
   equipped weapons; elemental resistances add up across all gear, down to full immunity
   (as in vanilla).
-- New consumables: **Invigorating Draught / Cask** (500 / 300 SP) and **Vital Draught /
-  Cask** (50% / 35% max HP). From danger 68, ordinary enemy drops (and Therion's steals)
-  become Revitalizing Jam, Olive of Life, and these.
+- New consumables: **Invigorating Draught / Cask** (500 / 300 SP), **Vital Draught /
+  Cask** (50% / 35% max HP) and **XL Soulstones** (9,000 elemental damage to all foes; from
+  world level 70).
+- **Loot keeps pace with the world:** enemy drops and Therion's steals climb their ladder one
+  rung at world danger 35, 50, 65 and 80 - grapes -> Grape (M) -> Vital Draught ->
+  Refreshing Jam -> Revitalizing Jam, plums the same way, olives to Olive of Life (L),
+  pomegranates to the jam, soulstones (M) -> (L) -> (XL).
 
 ![The gear ladder](docs/images/gear.png)
 
@@ -141,7 +145,9 @@ stage of the game.
 
 ## Requirements & credits
 
-**Requirements: none** — everything is built from your own game install.
+**Requirements: none** — everything is built from your own game install, and you don't
+need Python: the download carries its own copy of the official python.org runtime.
+Windows 10 or 11 and the Steam version of the game.
 
 Built to work alongside, with thanks:
 - [Better Descriptions](https://www.nexusmods.com/octopathtraveler/mods/16) — the new items'
