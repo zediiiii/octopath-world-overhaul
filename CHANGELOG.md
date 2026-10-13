@@ -2,6 +2,9 @@
 
 ## 1.0.0-beta.6
 
+- **No archive inside the download:** the bundled Python standard library ships as plain
+  files (runtime\Lib) instead of a zip within the zip, which Nexus treats as a nested
+  archive and quarantines.
 - **Side-story walkthroughs in the journal:** every side story's journal entry lists each
   step with town and region: who starts it, who to ask around, who has each item or piece
   of information (and whether to Purchase/Steal or Inquire/Scrutinize), the steps on the way,

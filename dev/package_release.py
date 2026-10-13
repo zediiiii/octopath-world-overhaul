@@ -8,8 +8,9 @@ as Python malware, so some antivirus tools flag it. The release is instead
                               No exe of our own: an unsigned launcher exe drew machine-learning
                               "suspicious" verdicts too.
   runtime\\                    the official python.org runtime (signed by the PSF), trimmed:
-                              the interpreter, the DLLs the mod uses, a zipped standard library
-                              and Tcl/Tk for the windows
+                              the interpreter, the DLLs the mod uses, the standard library
+                              (Lib\\, plain .py files - a zip inside the upload would be a
+                              nested archive, which Nexus quarantines) and Tcl/Tk
   app\\                        the mod's source, as plain .py files
   data\\  README.md  LICENSE  CHANGELOG.md
 
@@ -17,7 +18,6 @@ Run with the same Python version the runtime should be (the one on PATH):
   python dev/package_release.py
 """
 import glob
-import importlib._bootstrap_external
 import os
 import shutil
 import sys
@@ -62,24 +62,21 @@ def copy_runtime(dst):
         shutil.copytree(os.path.join(PY, "tcl", d), os.path.join(dst, "tcl", d),
                         ignore=lambda _d, names: [n for n in names if n in SKIP_TCL])
     lib = os.path.join(PY, "Lib")
-    with zipfile.ZipFile(os.path.join(dst, f"{TAG}.zip"), "w", zipfile.ZIP_DEFLATED) as z:
-        for dirpath, dirs, files in os.walk(lib):
-            rel = os.path.relpath(dirpath, lib).replace(os.sep, "/")
-            dirs[:] = sorted(d for d in dirs if d not in SKIP_LIB
-                             and (rel == "." and d or f"{rel}/{d}") not in SKIP_LIB)
-            for f in sorted(files):
-                if not f.endswith(".py") or rel == "." and f in SKIP_LIB:
-                    continue
-                arc = f if rel == "." else f"{rel}/{f}"
-                with open(os.path.join(dirpath, f), "rb") as fh:
-                    src = fh.read()
-                # sourceless .pyc: zipimport loads it without a .py to check against
-                code = compile(src, arc, "exec", dont_inherit=True)
-                z.writestr(arc + "c", importlib._bootstrap_external._code_to_timestamp_pyc(
-                    code, 0, len(src)))
+    # a plain folder of .py files, not a zip: Nexus quarantines archives nested in an upload
+    out = os.path.join(dst, "Lib")
+    for dirpath, dirs, files in os.walk(lib):
+        rel = os.path.relpath(dirpath, lib).replace(os.sep, "/")
+        dirs[:] = sorted(d for d in dirs if d not in SKIP_LIB
+                         and (rel == "." and d or f"{rel}/{d}") not in SKIP_LIB)
+        for f in sorted(files):
+            if not f.endswith(".py") or rel == "." and f in SKIP_LIB:
+                continue
+            target = os.path.join(out, rel, f) if rel != "." else os.path.join(out, f)
+            os.makedirs(os.path.dirname(target), exist_ok=True)
+            shutil.copy2(os.path.join(dirpath, f), target)
     # the ._pth file pins sys.path to these entries (no user site-packages, no PYTHONPATH)
     with open(os.path.join(dst, f"{TAG}._pth"), "w") as f:
-        f.write(f"{TAG}.zip\n.\n..\\app\n")
+        f.write("Lib\n.\n..\\app\n")
 
 
 # double-click entry points (CRLF; %~dp0 = this folder)
