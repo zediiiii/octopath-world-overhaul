@@ -96,6 +96,7 @@ Steam version on Windows (not Game Pass, not Steam Deck/Linux). Other text mods 
 [size=5][b]Good to know[/b][/size]
 [list]
 [*][b]Play in borderless fullscreen.[/b] The launcher shows a banner while you play when your progress would grow the world; in exclusive fullscreen nothing can appear over the game, so you'd only see it after Alt-Tab. Borderless also avoids a display crash on some streaming / virtual-display setups.
+[*][b]Source code:[/b] [url=https://github.com/zediiiii/octopath-world-overhaul]github.com/zediiiii/octopath-world-overhaul[/url] (MIT licence).
 [*]No game files are included: the mod is built on your PC from your own installation.
 [*]Your saves are only read, never written.
 [*]No exe of its own: the only programs in the zip are the official python.org runtime, digitally signed by the Python Software Foundation. The mod is plain-text Python source in the app folder (read every line), and OrsterraUnbound is a two-line script. Windows may ask "Do you want to run this file?" the first time: click Run.
