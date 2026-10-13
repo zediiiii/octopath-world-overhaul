@@ -93,7 +93,20 @@ the shortcut at the new version. You can then delete the old `OctopathWorldOverh
 - **Loot keeps pace with the world:** enemy drops and Therion's steals climb their ladder one
   rung at world danger 35, 50, 65 and 80 - grapes -> Grape (M) -> Vital Draught ->
   Refreshing Jam -> Revitalizing Jam, plums the same way, olives to Olive of Life (L),
-  pomegranates to the jam, soulstones (M) -> (L) -> (XL).
+  pomegranates to the jam, soulstones (M) -> (L) -> (XL), nuts up to **(XL)** (5x the (L)
+  nut, from world 80, never sold).
+- **Treasure chests keep pace too** - all of them, in a new game as in an old one: their
+  consumables climb the same ladder (items already at the top - jams, Olive of Life (L),
+  status cures - come in bigger stacks: x2 from world 50, x3 from 80), gear becomes the
+  most similar tier piece of the same type (a staff stays a staff, a poison talisman finds
+  the poison-proof one; money if nothing matches), and money and sell-only treasures pay
+  x(world / 12) - x6 at world 72.
+- **Side stories pay more:** every reward is kept; the money scales the same way, and the
+  free reward slots get world-level counterparts of what the story already gives (tier gear
+  for gear, better nuts, laddered stacks), bigger for the game's later-chapter stories.
+- **Fixed-number skills grow:** Alfyn's concoctions, Rest's SP and hired helpers' heals
+  restore x(world / 35) from world 35 (x2 at 70). Skills that scale with stats already grow
+  with the new gear.
 
 ![The gear ladder](docs/images/gear.png)
 

@@ -24,6 +24,7 @@ import pak
 import uasset
 import datatable as dt
 import pakwrite
+import rewards
 import make_gear
 import balance
 import buildlog
@@ -48,6 +49,7 @@ NEW_GEAR = True
 FAST_TRAVEL = True
 CONSUMABLE_UPGRADES = True
 TOGGLE_DASH = False        # overhaul.ini [features] toggle_dash
+SCALE_SKILLS = True        # overhaul.ini [features] scale_skills (skills.py)
 JOURNAL_HINTS = True       # overhaul.ini [features] journal_hints (side_stories.py)
 CAP_TEST_IN_SHOP = False
 
@@ -82,24 +84,8 @@ CONSUMABLE_SELL_RATIO = 0.1
 # A tier is only sold - or dropped - once the world is within this many danger points of it.
 # It was 10, which let tier 60 be bought at danger 50 where it is ~1.5x too strong.
 LOOKAHEAD = 5
-# Loot keeps pace with the world: a random enemy's consumable drop (and what it can be robbed
-# of) climbs its ladder one rung for every UPGRADE_STEPS danger passed, so by the 60s a grape
-# drop is a Refreshing Jam and a plain soulstone an XL one. Rungs are vanilla ItemDB keys or
-# our minted items (by name); an item's rung is its first place in any ladder. Alfyn's
-# concoct materials and the status cures are left alone.
-CONSUMABLE_LADDERS = [
-    ["ITM_095", "ITM_078", "ITM_079", "Vital Draught", "ITM_007", "ITM_018"],  # HP, one ally
-    ["ITM_101", "ITM_086", "ITM_087", "Invigorating Draught", "ITM_007", "ITM_018"],  # SP
-    ["ITM_023", "ITM_078", "ITM_079", "Vital Draught", "ITM_007", "ITM_018"],  # Ali's Bread
-    ["ITM_080", "Vital Cask"],                           # HP, whole party
-    ["ITM_088", "Invigorating Cask"],                    # SP, whole party
-    ["ITM_093", "ITM_009", "ITM_010", "ITM_017"],        # revive: herb, olives
-    ["ITM_143", "ITM_144", "ITM_145", "ITM_018"],        # BP: pomegranates, then the jam
-] + [[base, m, l, f"{el} Soulstone (XL)"] for el, base, m, l in (
-    ("Fire", "ITM_028", "ITM_029", "ITM_137"), ("Ice", "ITM_030", "ITM_031", "ITM_138"),
-    ("Thunder", "ITM_032", "ITM_033", "ITM_139"), ("Wind", "ITM_034", "ITM_035", "ITM_140"),
-    ("Light", "ITM_036", "ITM_115", "ITM_141"), ("Shadow", "ITM_037", "ITM_116", "ITM_142"))]
-UPGRADE_STEPS = (35, 50, 65, 80)  # world danger at which drops climb one more rung
+# Loot keeps pace with the world (rewards.py): consumable drops and steals climb their
+# ladders with world danger; treasure chests and side-story rewards follow the same rules.
 CONSUMABLE_MIN_DROP = 10          # percent, for drops that have climbed 3+ rungs
 SHOP_LOOKAHEAD = LOOKAHEAD
 DROP_RATE = 1            # percent, for repeatable random encounters
@@ -155,6 +141,14 @@ def tier_numbers():
 
 def design_catalogue(nums):
     """-> list of dicts describing every item to mint (see catalogue.py)."""
+    if not catalogue.NUT_L_GROWTH:
+        bp = pak.Pak(paths.base_pak())
+        items = uasset.read_datatable(bp.read(make_gear.ITEMS + ".uasset"),
+                                      bp.read(make_gear.ITEMS + ".uexp"))
+        g = lambda d, pre: next(vv for kk, vv in d.items() if kk.split("_")[0] == pre)
+        for _name, key in catalogue.NUT_XL:
+            a = g(items[key], "Ailment")[0]
+            catalogue.NUT_L_GROWTH[key] = (g(a, "AilmentName"), g(a, "InvocationValue"))
     return catalogue.design(nums)
 
 
@@ -192,7 +186,8 @@ def main(out_path=None, install=False):
                            immune=spec.get("immune", ()),
                            sell_ratio=(CONSUMABLE_SELL_RATIO if spec["kind"] == "consumable"
                                        else GEAR_SELL_RATIO))
-        info.update(tier=spec["tier"], kind=spec["kind"], gated=spec.get("gated", False))
+        info.update(tier=spec["tier"], kind=spec["kind"], gated=spec.get("gated", False),
+                    unsold=spec.get("unsold", False))
         minted.append(info)
     if NEW_GEAR:
         info = forge.forge(catalogue.ACCESSORY_TEMPLATE, LAUREL_NAME,
@@ -354,49 +349,51 @@ def main(out_path=None, install=False):
               f"fixed at danger {B.FINAL_BOSS_DANGER}")
     print(f"drop tiers open at danger {floor}: {open_tiers or 'none yet (vanilla drops kept)'}")
     print(f"drops: {kept_unique} enemies keep a unique vanilla drop (not sold anywhere)")
-    # ---- consumable drops climb their ladders as the world grows (CONSUMABLE_LADDERS) ----
-    climb = sum(1 for d in UPGRADE_STEPS if floor >= d)
-    upgraded = collections.Counter()
-    if CONSUMABLE_UPGRADES and climb:
-        minted_by_name = {m["name"]: m for m in minted}
-        rung = {}
-        for ladder in CONSUMABLE_LADDERS:
-            for n, item in enumerate(ladder):
-                rung.setdefault(item, (ladder, n))
-
-        def available(item):
-            """Minted rungs only once their tier is open (the XL soulstones from 70)."""
-            m = minted_by_name.get(item)
-            return m is None or m["tier"] <= floor + LOOKAHEAD or not m.get("gated")
-
-        def ref(key):
-            """-> (EnemyDB name index, FName number) for a ladder rung."""
-            nonlocal eua, enames
-            if key in minted_by_name:
-                return enames.index(make_gear.ROW_ANCHOR), minted_by_name[key]["row_num"]
-            if key not in enames:
-                eua = dt.add_names(eua, [key])
-                enames, _ = uasset.names_of(eua)
-            return enames.index(key), 0
+    # ---- consumable drops climb their ladders as the world grows (rewards.py) ----
+    base_items = uasset.read_datatable(bp.read(make_gear.ITEMS + ".uasset"),
+                                       bp.read(make_gear.ITEMS + ".uexp"))
+    up = rewards.Upgrader(floor, minted, base_items, open_tiers, LOOKAHEAD)
+    upgraded = 0
+    if CONSUMABLE_UPGRADES and up.climb:
+        names = rewards._Names(eua)
         cur = uasset.read_datatable(eua, bytes(eue))
         for i, k in enumerate(ekeys):
             have = g(base_rows[k], "HaveItemID")
-            if cls[k] != "random" or have not in rung or g(cur[k], "HaveItemID") != have:
+            if cls[k] != "random" or have not in up.rung or g(cur[k], "HaveItemID") != have:
                 continue                    # bosses, NPCs, rows given tier gear, other items
-            ladder, n = rung[have]
-            top = n + climb
-            while top > n and (top >= len(ladder) or not available(ladder[top])):
-                top -= 1
-            if top == n:
+            new, _cnt = up.consumable(have, 1)
+            if new == have:
                 continue
-            dt.set_fname(eue, have_offs[i], *ref(ladder[top]))
+            dt.set_fname(eue, have_offs[i], *names.ref(new, up.by_name))
             o = prob_offs[i]
-            if top - n >= 3 and struct.unpack_from("<i", eue, o)[0] < CONSUMABLE_MIN_DROP:
+            if up.climb >= 3 and struct.unpack_from("<i", eue, o)[0] < CONSUMABLE_MIN_DROP:
                 struct.pack_into("<i", eue, o, CONSUMABLE_MIN_DROP)
-            upgraded[ladder[top]] += 1
+            upgraded += 1
+        eua = names.ua
         files[B.ENEMY + ".uasset"] = eua
-        print(f"consumable drops climb {climb} rung(s) at danger {floor}: "
-              f"{sum(upgraded.values())} enemies now drop / can be robbed of better items")
+        print(f"consumable drops climb {up.climb} rung(s) at danger {floor}: "
+              f"{upgraded} enemies now drop / can be robbed of better items")
+    if CONSUMABLE_UPGRADES:
+        # treasure chests and side-story rewards, for the whole world (not just what's left)
+        oua, oue = rewards.chests(bp.read(rewards.OBJECTS + ".uasset"),
+                                  bp.read(rewards.OBJECTS + ".uexp"), up, log=print)
+        files[rewards.OBJECTS + ".uasset"], files[rewards.OBJECTS + ".uexp"] = oua, oue
+        mua, mue = rewards.side_stories(bp.read(rewards.MISSIONS + ".uasset"),
+                                        bp.read(rewards.MISSIONS + ".uexp"), up, log=print)
+        files[rewards.MISSIONS + ".uasset"], files[rewards.MISSIONS + ".uexp"] = mua, mue
+    if SCALE_SKILLS:
+        import skills
+        text = uasset.read_datatable(bp.read(make_gear.TEXT + ".uasset"),
+                                     bp.read(make_gear.TEXT + ".uexp"))
+        item_names = {(text.get(g(v, "ItemNameID")) or {}).get("Text")
+                      for v in base_items.values()}
+        aua, aue = skills.scale(files.get(skills.ABILITIES + ".uasset") or
+                                bp.read(skills.ABILITIES + ".uasset"),
+                                files.get(skills.ABILITIES + ".uexp") or
+                                bp.read(skills.ABILITIES + ".uexp"),
+                                floor, item_names, text, log=print)
+        if aue != bp.read(skills.ABILITIES + ".uexp"):
+            files[skills.ABILITIES + ".uasset"], files[skills.ABILITIES + ".uexp"] = aua, aue
     files[B.ENEMY + ".uexp"] = bytes(eue)
     uasset.read_datatable(eua, bytes(eue))      # must still parse
     print(f"rare drops: {drops - boss_drops} enemies at {DROP_RATE}%, "
@@ -423,7 +420,7 @@ def main(out_path=None, install=False):
     plan = [(GRANDPORT_WEAPONS, "Sea_L_A_SHOP_w_01",
              [m for m in minted if m["kind"] in ("weapon", "armour") and stocked(m)]),
             (GRANDPORT_ITEMS, "Sea_L_A_SHOP_i_01",
-             [m for m in minted if (m["kind"] == "consumable"
+             [m for m in minted if (m["kind"] == "consumable" and not m.get("unsold")
                                     and (not m.get("gated") or m["tier"] <= floor + SHOP_LOOKAHEAD))
               or (m["kind"] == "test" and CAP_TEST_IN_SHOP)
               or (m["kind"] == "reward" and side_all)

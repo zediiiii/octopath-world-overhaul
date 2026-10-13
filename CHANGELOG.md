@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.0.0-beta.7
+
+- **Treasure chests keep pace with the world** (all 734, for any save): consumables climb the
+  loot ladder; top items (jams, Olive of Life (L), status cures) come in bigger stacks (x2
+  from world 50, x3 from 80); gear becomes the most similar open-tier piece of the same type
+  (stats and status immunities matched; money when nothing matches); money and sell-only
+  treasures pay x(world / 12).
+- **Side stories pay more:** existing rewards kept, money scaled the same way, and the free
+  reward slots get world-level counterparts of the story's rewards (tier gear, better nuts,
+  laddered stacks), scaled by the story's original chapter.
+- **XL nuts** (5x the (L) nut) from world 80 - chests, side stories and drops only.
+- **Fixed-number skills grow:** party skills that restore a fixed HP / SP amount (Alfyn's
+  concoctions, Rest, hired helpers) restore x(world / 35) from world 35. `scale_skills`.
+- New module rewards.py (drops, chests, side stories share one set of rules).
+
 ## 1.0.0-beta.6
 
 - **Loot keeps pace with the world:** consumable drops and steals climb a ladder one rung at

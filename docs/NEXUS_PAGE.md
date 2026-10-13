@@ -2,7 +2,7 @@
 
 **Name:** Orsterra Unbound - World Overhaul
 **Category:** Overhauls
-**Version:** 1.0.0-beta.6
+**Version:** 1.0.0-beta.7
 **Short description (350 chars max):** Vanilla chapter 1s, then a world that keeps up: enemies
 and bosses scale with your story and party, 560+ new multi-stat items up to level 104, stats past
 999, elemental boosts that work on accessories, fast travel to visited places, half the random
@@ -39,7 +39,10 @@ The whole journey stays a real fight — from the first chapter to the last boss
 [*]Every piece boosts several stats, and the description lists every number and how it stacks.
 [*]Weapon styles with on-hit effects, Twinfang double strikes, Gambler's crit-or-miss, Headsman's instant kills, dual-element weapons, Hallowed healer staves, a physical War Staff, status-immunity talismans, regen pendants, elemental wards, sigils and hearts.
 [*]Big SP and %HP restoratives, and XL Soulstones from world level 70.
-[*][b]Loot keeps pace with the world:[/b] enemy drops and steals climb a rung at world danger 35, 50, 65 and 80 — grapes become Grape (M), Vital Draught, Refreshing Jam, then Revitalizing Jam; plums, olives and pomegranates climb the same way; soulstones reach (XL).
+[*][b]Loot keeps pace with the world:[/b] enemy drops and steals climb a rung at world danger 35, 50, 65 and 80 — grapes become Grape (M), Vital Draught, Refreshing Jam, then Revitalizing Jam; plums, olives and pomegranates climb the same way; soulstones reach (XL), nuts reach (XL) from world 80 (never sold).
+[*][b]Treasure chests keep pace too[/b] — every chest: consumables climb the same ladder (jams, Olive of Life (L) and status cures come in bigger stacks), gear becomes the most similar tier piece of the same type, and money pays up to ×6 at world 72.
+[*][b]Side stories pay more[/b]: every reward is kept, the money scales, and the free reward slots get world-level counterparts of what the story gives — bigger for later-chapter stories.
+[*][b]Fixed-number skills grow[/b]: Alfyn's concoctions, Rest and hired helpers' heals scale with the world (×2 at 70).
 [*]Gear you already own is never changed. New gear sells back for half its price, so you can try it on.
 [*][b]Fortune's Purse[/b]: triple JP and battle money (the best JP/money item worn counts; they don't stack).
 [*][b]Wayfarer's Laurel[/b]: appears in Grandport once you've finished all 101 side stories — +1,500 to every stat, regeneration, more EXP, JP and money.

@@ -75,6 +75,7 @@ FEATURES = {
     "scale_tressa_collect": True,
     "consumable_upgrades": True,  # consumable drops / steals climb with the world
     "toggle_dash": False,         # dash button toggles running instead of hold-to-run
+    "scale_skills": True,         # fixed HP/SP restores of party skills grow with the world
     "journal_hints": True,        # side-story journal entries: step-by-step walkthroughs
 }
 
@@ -115,6 +116,8 @@ scale_tressa_collect = true
 consumable_upgrades = true
 ; press dash once to run, again to walk (instead of holding the button)
 toggle_dash = false
+; party skills that restore a fixed amount (concoctions, Rest, helpers) grow with the world
+scale_skills = true
 ; side-story journal entries become step-by-step walkthroughs (who, where, region)
 journal_hints = true
 
@@ -227,6 +230,7 @@ def apply(cfg):
     build_all.CONSUMABLE_UPGRADES = f["consumable_upgrades"]
     build_all.TOGGLE_DASH = f["toggle_dash"]
     build_all.JOURNAL_HINTS = f["journal_hints"]
+    build_all.SCALE_SKILLS = f["scale_skills"]
     build_all.CAP_TEST_ITEM = cfg["cap_test_charm"]
     return cfg
 

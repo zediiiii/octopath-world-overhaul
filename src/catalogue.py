@@ -164,6 +164,19 @@ SOULSTONE_XL = [("Fire", "ITM_137"), ("Ice", "ITM_138"), ("Thunder", "ITM_139"),
 SOULSTONE_XL_DAMAGE = 9000
 SOULSTONE_XL_PRICE = 20000
 SOULSTONE_XL_TIER = 70
+# XL nuts: five times the (L) nut, for worlds at 80+ where a (L) nut's +28 is noise. Only
+# from chests, side stories and drops - never sold, or they would be an unlimited stat farm.
+NUT_XL = [("Nourishing Nut", "ITM_048"), ("Invigorating Nut", "ITM_051"),
+          ("Fortifying Nut", "ITM_054"), ("Tough Nut", "ITM_057"), ("Magic Nut", "ITM_060"),
+          ("Resistant Nut", "ITM_063"), ("Sharp Nut", "ITM_066"), ("Slippery Nut", "ITM_069"),
+          ("Critical Nut", "ITM_072"), ("Light Nut", "ITM_075")]
+NUT_XL_FACTOR = 5
+NUT_XL_TIER = 85                  # gated: available from danger 80 (tier - lookahead 5)
+NUT_XL_PRICE = 30000
+NUT_GROWS = {"GROW_HP": "max HP", "GROW_MP": "max SP", "GROW_ATK": "physical attack",
+             "GROW_DEF": "physical defense", "GROW_MATK": "elemental attack",
+             "GROW_MDEF": "elemental defense", "GROW_ACC": "accuracy", "GROW_EVA": "evasion",
+             "GROW_CON": "critical", "GROW_AGI": "speed"}
 
 
 def accessory_points(stats):
@@ -658,4 +671,15 @@ def design(nums):
                         ailment=[("HP_FIXED_DAMAGE", SOULSTONE_XL_DAMAGE)],
                         price=SOULSTONE_XL_PRICE,
                         desc=f"Deals {SOULSTONE_XL_DAMAGE:,} {word} damage to all foes."))
+    for name, template in NUT_XL:
+        grow, value = NUT_L_GROWTH[template]
+        out.append(dict(tier=NUT_XL_TIER, kind="consumable", gated=True, unsold=True,
+                        template=template, name=f"{name} (XL)", stats={}, immune=(),
+                        ailment=[(grow, value * NUT_XL_FACTOR)], price=NUT_XL_PRICE,
+                        desc=f"Permanently raises {NUT_GROWS[grow]} by "
+                             f"{value * NUT_XL_FACTOR:,}."))
     return out
+
+
+# GROW effect and value of each (L) nut, read from ItemDB when the catalogue is designed
+NUT_L_GROWTH = {}
