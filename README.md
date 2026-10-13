@@ -88,8 +88,9 @@ the shortcut at the new version. You can then delete the old `OctopathWorldOverh
   equipped weapons; elemental resistances add up across all gear, down to full immunity
   (as in vanilla).
 - New consumables: **Invigorating Draught / Cask** (500 / 300 SP), **Vital Draught /
-  Cask** (50% / 35% max HP) and **XL Soulstones** (9,000 elemental damage to all foes; from
-  world level 70).
+  Cask** (50% / 35% max HP), **XL Soulstones** (elemental damage to all foes: 12,000, or
+  half a regular foe's HP once that is more - 14,000 at 90, 18,000 at 104; from world 70)
+  and **Olive of Life (XL)** (revives with full HP; from world 75).
 - **Loot keeps pace with the world:** enemy drops and Therion's steals climb their ladder one
   rung at world danger 35, 50, 65 and 80 - grapes -> Grape (M) -> Vital Draught ->
   Refreshing Jam -> Revitalizing Jam, plums the same way, olives to Olive of Life (L),
@@ -100,13 +101,18 @@ the shortcut at the new version. You can then delete the old `OctopathWorldOverh
   status cures - come in bigger stacks: x2 from world 50, x3 from 80), gear becomes the
   most similar tier piece of the same type (a staff stays a staff, a poison talisman finds
   the poison-proof one; money if nothing matches), and money and sell-only treasures pay
-  x(world / 12) - x6 at world 72.
+  x(world / 12) - x6 at world 72 - and from world 60 follow tier-gear prices, so a chest
+  stays worth about a third of a gear piece.
 - **Side stories pay more:** every reward is kept; the money scales the same way, and the
   free reward slots get world-level counterparts of what the story already gives (tier gear
   for gear, better nuts, laddered stacks), bigger for the game's later-chapter stories.
-- **Fixed-number skills grow:** Alfyn's concoctions, Rest's SP and hired helpers' heals
-  restore x(world / 35) from world 35 (x2 at 70). Skills that scale with stats already grow
-  with the new gear.
+- **Fixed-number skills grow:** Alfyn's concoctions, Rest and hired helpers' heals grow with
+  your party's HP, so they keep their vanilla feel (Restore Health ~70% of a bar, Incredible
+  Heal a full heal); their SP restores grow 40% as fast. Skills that scale with stats already
+  grow with the new gear.
+- **Runes for the whole party:** the Runelord's six elemental runes enchant every ally's
+  weapons (Transfer Rune unchanged). Rune damage is the equipped weapon's elemental attack
+  x 8, so pair them with elemental-attack weapons.
 
 ![The gear ladder](docs/images/gear.png)
 

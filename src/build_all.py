@@ -50,6 +50,7 @@ FAST_TRAVEL = True
 CONSUMABLE_UPGRADES = True
 TOGGLE_DASH = False        # overhaul.ini [features] toggle_dash
 SCALE_SKILLS = True        # overhaul.ini [features] scale_skills (skills.py)
+PARTY_RUNES = True         # overhaul.ini [features] party_runes (skills.py)
 JOURNAL_HINTS = True       # overhaul.ini [features] journal_hints (side_stories.py)
 CAP_TEST_IN_SHOP = False
 
@@ -139,6 +140,25 @@ def tier_numbers():
     return out
 
 
+def party_hp(danger, nums):
+    """A party member's max HP at a danger: the kit the gear formula assumes (vanilla endgame,
+    KIT_HP) plus three armour pieces of the tier the world has reached, interpolated."""
+    pts = [(45, KIT_HP)] + [(T, KIT_HP + 3 * nums[T]["hp_slot"]) for T in TIERS]
+    if danger <= pts[0][0]:
+        return KIT_HP
+    for (d0, h0), (d1, h1) in zip(pts, pts[1:]):
+        if danger <= d1:
+            return h0 + (h1 - h0) * (danger - d0) / (d1 - d0)
+    return pts[-1][1]
+
+
+def soulstone_xl_damage(danger):
+    """XL soulstones: half a regular foe's HP at this danger, never below the minimum."""
+    _p, curve, levels = balance.enemy_curve()
+    half = B.profile_at(curve, levels, danger)["HP"] / 2
+    return int(max(catalogue.SOULSTONE_XL_MIN, round(half, -3)))
+
+
 def design_catalogue(nums):
     """-> list of dicts describing every item to mint (see catalogue.py)."""
     if not catalogue.NUT_L_GROWTH:
@@ -158,6 +178,7 @@ def main(out_path=None, install=False):
     print = lambda *a, **k: log.info(" ".join(str(x) for x in a))
     files, floor, target, _gm = B.build(out_path=None, verbose=True, pack=False)
     nums = tier_numbers()
+    catalogue.SOULSTONE_XL_DAMAGE = soulstone_xl_damage(floor)
     cat = design_catalogue(nums)
     if not NEW_GEAR:
         # keep the new consumables (SP / % HP restores); drop the equipment ladder
@@ -224,6 +245,16 @@ def main(out_path=None, install=False):
     print(f"item IDs {min(m['id'] for m in minted)}-{max(m['id'] for m in minted)} "
           f"(stable across rebuilds, see {os.path.basename(make_gear.REGISTRY)})")
     iua, iue = dt.append_rows(forge.item_ua, forge.item_ue, forge.new_items)
+    if PARTY_RUNES:
+        import skills
+        bp0 = pak.Pak(paths.base_pak())
+        abil = uasset.read_datatable(bp0.read(skills.ABILITIES + ".uasset"),
+                                     bp0.read(skills.ABILITIES + ".uexp"))
+        text0 = uasset.read_datatable(bp0.read(make_gear.TEXT + ".uasset"),
+                                      bp0.read(make_gear.TEXT + ".uexp"))
+        labels = {skills._g(abil[k], "Detail") for k in skills.rune_rows(abil, text0)}
+        forge.text_ua, forge.text_ue = skills.rune_text(forge.text_ua, forge.text_ue, labels,
+                                                        log=print)
     if JOURNAL_HINTS:
         import side_stories
         forge.text_ua, forge.text_ue = side_stories.add_walkthroughs(forge.text_ua, forge.text_ue,
@@ -381,17 +412,19 @@ def main(out_path=None, install=False):
         mua, mue = rewards.side_stories(bp.read(rewards.MISSIONS + ".uasset"),
                                         bp.read(rewards.MISSIONS + ".uexp"), up, log=print)
         files[rewards.MISSIONS + ".uasset"], files[rewards.MISSIONS + ".uexp"] = mua, mue
-    if SCALE_SKILLS:
+    if SCALE_SKILLS or PARTY_RUNES:
         import skills
         text = uasset.read_datatable(bp.read(make_gear.TEXT + ".uasset"),
                                      bp.read(make_gear.TEXT + ".uexp"))
         item_names = {(text.get(g(v, "ItemNameID")) or {}).get("Text")
                       for v in base_items.values()}
-        aua, aue = skills.scale(files.get(skills.ABILITIES + ".uasset") or
-                                bp.read(skills.ABILITIES + ".uasset"),
-                                files.get(skills.ABILITIES + ".uexp") or
-                                bp.read(skills.ABILITIES + ".uexp"),
-                                floor, item_names, text, log=print)
+        aua = files.get(skills.ABILITIES + ".uasset") or bp.read(skills.ABILITIES + ".uasset")
+        aue = files.get(skills.ABILITIES + ".uexp") or bp.read(skills.ABILITIES + ".uexp")
+        if SCALE_SKILLS:
+            aua, aue = skills.scale(aua, aue, party_hp(floor, nums) / KIT_HP, item_names,
+                                    text, floor, log=print)
+        if PARTY_RUNES:
+            aua, aue, rune_details = skills.runes_for_all(aua, aue, text, log=print)
         if aue != bp.read(skills.ABILITIES + ".uexp"):
             files[skills.ABILITIES + ".uasset"], files[skills.ABILITIES + ".uexp"] = aua, aue
     files[B.ENEMY + ".uexp"] = bytes(eue)

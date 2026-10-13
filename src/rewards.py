@@ -28,7 +28,7 @@ LADDERS = [
     ["ITM_101", "ITM_086", "ITM_087", "Invigorating Draught", "ITM_007", "ITM_018"],  # SP
     ["ITM_080", "Vital Cask"],                           # HP, whole party
     ["ITM_088", "Invigorating Cask"],                    # SP, whole party
-    ["ITM_093", "ITM_009", "ITM_010", "ITM_017"],        # revive: herb, olives
+    ["ITM_093", "ITM_009", "ITM_010", "ITM_017", "Olive of Life (XL)"],   # revive
     ["ITM_143", "ITM_144", "ITM_145", "ITM_018"],        # BP: pomegranates, then the jam
 ] + [[base, m, lg, f"{el} Soulstone (XL)"] for el, base, m, lg in (
     ("Fire", "ITM_028", "ITM_029", "ITM_137"), ("Ice", "ITM_030", "ITM_031", "ITM_138"),
@@ -46,7 +46,9 @@ LADDERS = [
     ("Critical Nut", "ITM_074", "ITM_073", "ITM_072"),
     ("Light Nut", "ITM_077", "ITM_076", "ITM_075"))]
 UPGRADE_STEPS = (35, 50, 65, 80)  # world danger at which loot climbs one more rung
-MONEY_BASE = 12                   # money x (danger / 12): x1 in the opening, x6 at 72
+MONEY_BASE = 12                   # money x (danger / 12): x1 in the opening, x6 at 72 ...
+MONEY_PRICE_SHARE = 2.5           # ... and from 60 on, it follows tier-gear prices
+                                  # ((danger / 60)^3), so a chest stays ~30-40% of a piece
 STACKS = ((50, 2), (80, 3))       # top-rung / unladdered consumables: count x2 at 50, x3 at 80
 MAX_COUNT = 9
 # side stories: chapter-1 stories add a smaller bonus than the game's late ones
@@ -59,7 +61,7 @@ def climb(floor):
 
 
 def money_mult(floor):
-    return max(1.0, floor / MONEY_BASE)
+    return max(1.0, floor / MONEY_BASE, MONEY_PRICE_SHARE * (floor / 60) ** 3)
 
 
 def count_mult(floor):

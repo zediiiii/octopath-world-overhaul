@@ -157,11 +157,19 @@ VITAL_SINGLE_PCT = 50
 VITAL_GROUP_PCT = 35
 VITAL_SINGLE_PRICE = 6000
 VITAL_GROUP_PRICE = 18000
-# XL soulstones: one more rung above the shipped (L) ones (2,700 to all foes), for worlds
-# where foes have 20,000+ HP. Sold - and reached by drop upgrades - from tier 70.
+# XL soulstones: one more rung above the shipped (L) ones (2,700 to all foes). The (L) hit for
+# 40-70% of a regular foe's HP where it was meant to be used; XL deals 12,000 or half a
+# regular foe's HP at the world's danger, whichever is more (set per build, see
+# soulstone_xl_damage). Sold - and reached by drop upgrades - from tier 70.
 SOULSTONE_XL = [("Fire", "ITM_137"), ("Ice", "ITM_138"), ("Thunder", "ITM_139"),
                 ("Wind", "ITM_140"), ("Light", "ITM_141"), ("Shadow", "ITM_142")]
-SOULSTONE_XL_DAMAGE = 9000
+SOULSTONE_XL_MIN = 12000
+SOULSTONE_XL_DAMAGE = SOULSTONE_XL_MIN   # set per build by build_all (half a foe's HP)
+# Olive of Life (XL): revives to full HP (the (L) restores 9,998 - about half a bar by world
+# 80). From world 75.
+OLIVE_XL_TEMPLATE = "ITM_017"
+OLIVE_XL_TIER = 80
+OLIVE_XL_PRICE = 50000
 SOULSTONE_XL_PRICE = 20000
 SOULSTONE_XL_TIER = 70
 # XL nuts: five times the (L) nut, for worlds at 80+ where a (L) nut's +28 is noise. Only
@@ -671,6 +679,10 @@ def design(nums):
                         ailment=[("HP_FIXED_DAMAGE", SOULSTONE_XL_DAMAGE)],
                         price=SOULSTONE_XL_PRICE,
                         desc=f"Deals {SOULSTONE_XL_DAMAGE:,} {word} damage to all foes."))
+    out.append(dict(tier=OLIVE_XL_TIER, kind="consumable", gated=True,
+                    template=OLIVE_XL_TEMPLATE, name="Olive of Life (XL)", stats={}, immune=(),
+                    ailment=[("REVIVE", 1), ("HP_RATIO_RECOVERY", 100)], price=OLIVE_XL_PRICE,
+                    desc="Revives a single fallen ally with full HP."))
     for name, template in NUT_XL:
         grow, value = NUT_L_GROWTH[template]
         out.append(dict(tier=NUT_XL_TIER, kind="consumable", gated=True, unsold=True,

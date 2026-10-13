@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.0.0-beta.8
+
+- **Runes for the whole party:** the Runelord's six elemental runes (all four levels) now
+  enchant every ally's weapons; Transfer Rune unchanged. `party_runes`.
+  Their descriptions say so and state the damage: the equipped weapon's Elem. Atk. x 8.
+- **XL Soulstones** deal 12,000 or half a regular foe's HP at the world's danger, whichever is
+  more (12,000 at 70-81, 14,000 at 90, 18,000 at 104) - the vanilla (L) stone's 40-70%.
+- **Olive of Life (XL):** revives with full HP; from world 75, top of the revive ladder.
+- **Fixed-number heals follow party HP** instead of world / 35, keeping their vanilla
+  feel (Restore Health ~69% of a bar at every level; Incredible Heal a full heal); SP
+  restores grow 40% as fast.
+- **Money follows gear prices from world 60** (a chest ~30-44% of a tier piece; was 20% at
+  104). Balance numbers: `python dev/loot_balance.py`.
+
 ## 1.0.0-beta.7
 
 - **Treasure chests keep pace with the world** (all 734, for any save): consumables climb the
