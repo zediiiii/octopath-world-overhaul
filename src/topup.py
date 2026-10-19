@@ -22,7 +22,7 @@ import pak
 import paths
 import uasset
 
-TOPUP_BEHIND = 3
+TOPUP_BEHIND = 5
 
 
 def _g(row, pre):

@@ -100,7 +100,7 @@ ask_timeout = 20
 ;   table - levels below your leaders cost up to 5x less EXP; your save is never touched,
 ;           but a traveler who levelled cheaply owes the difference at the first normal
 ;           level, so they settle ~3 levels behind your leaders
-;   save  - before the game starts, anyone more than 3 levels behind your highest active
+;   save  - before the game starts, anyone more than 5 levels behind your highest active
 ;           traveler gets their EXP raised to that level's normal total; the game hands out
 ;           the levels after their next battle. Writes the save (backed up first; only the
 ;           EXP numbers change).

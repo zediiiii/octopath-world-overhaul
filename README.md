@@ -135,7 +135,7 @@ the shortcut at the new version. You can then delete the old `OctopathWorldOverh
   the rest of the world, up to 5× cheaper EXP for every level more than 2 below your highest
   active traveler. A benched or lagging traveler shoots up to about 3 levels under your
   leaders and keeps pace with them, without grinding. Or set `catch_up = save`: before the
-  game starts, anyone more than 3 levels behind gets their EXP raised to that level's normal
+  game starts, anyone more than 5 levels behind gets their EXP raised to that level's normal
   total (the save is backed up first and only EXP changes), so they truly catch up after
   their next battle.
 - **Higher caps**: stats 9,999 (from 999), HP 99,999 (from 9,999), damage 999,999.

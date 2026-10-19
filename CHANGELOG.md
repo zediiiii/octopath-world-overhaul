@@ -7,7 +7,7 @@
   traveler hasn't reached, so the leaders are never moved; everyone below climbs to about 3
   levels under them. Before, a traveler 5-10 levels behind hit one level that charged the
   whole EXP shortfall (e.g. 230,000+ EXP for a single level).
-- **Optional real catch-up (`catch_up = save`):** before the game starts, anyone more than 3
+- **Optional real catch-up (`catch_up = save`):** before the game starts, anyone more than 5
   levels behind your highest active traveler gets their EXP raised to that level's normal
   total, and the game hands out the levels after their next battle - no shortfall left.
   Writes the save (backed up first, only EXP changes). Off by default (`catch_up = table`).
