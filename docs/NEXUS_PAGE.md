@@ -62,7 +62,7 @@ The whole journey stays a real fight — from the first chapter to the last boss
 [*]Fast travel to every location you've visited (unvisited places stay locked).
 [*]Evasive Maneuvers built in — half the random encounters, one support-skill slot freed.
 [*][b]Toggle dash[/b] (optional, toggle_dash = true): press dash once to run, again to walk. A small patch to the game's own controller — no script loader needed.
-[*]Catch-up leveling: off in the vanilla opening, then phasing in with the rest of the world, up to 5× cheaper EXP for every level more than 2 below your highest active traveler — benched or lagging travelers shoot up to about 3 levels under your leaders and keep pace from there.
+[*]Catch-up leveling: off in the vanilla opening, then phasing in with the rest of the world, up to 5× cheaper EXP for every level more than 2 below your highest active traveler — benched or lagging travelers shoot up to about 3 levels under your leaders and keep pace from there. Optional catch_up = save tops up their EXP instead, so they truly catch up.
 [/list]
 
 [size=5][b]Presets[/b][/size]
@@ -103,7 +103,7 @@ Steam version on Windows (not Game Pass, not Steam Deck/Linux). Other text mods 
 [*][b]Play in borderless fullscreen.[/b] The launcher shows a banner while you play when your progress would grow the world; in exclusive fullscreen nothing can appear over the game, so you'd only see it after Alt-Tab. Borderless also avoids a display crash on some streaming / virtual-display setups.
 [*][b]Source code:[/b] [url=https://github.com/zediiiii/octopath-world-overhaul]github.com/zediiiii/octopath-world-overhaul[/url] (MIT licence).
 [*]No game files are included: the mod is built on your PC from your own installation.
-[*]Your saves are only read, never written.
+[*]Your saves are only read, never written — unless you turn on the optional catch_up = save, which raises lagging travelers' EXP (backed up first; nothing else changes).
 [*]No exe of its own: the only programs in the zip are the official python.org runtime, digitally signed by the Python Software Foundation. The mod is plain-text Python source in the app folder (read every line), and OrsterraUnbound is a two-line script. Windows may ask "Do you want to run this file?" the first time: click Run.
 [*]The fifth support-skill slot isn't possible: the slot count lives in the game's code.
 [/list]

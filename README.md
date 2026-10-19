@@ -9,7 +9,8 @@ far your story is and how strong your party is, bosses keep up when you out-leve
 a new 450-item gear ladder carries you to level 99 and beyond the old 999 stat cap.
 
 The mod is built **on your PC, from your own game files and your own save**, every time you
-launch. No game data is redistributed, and your saves are never modified.
+launch. No game data is redistributed, and your saves are never modified (unless you turn
+on the optional `catch_up = save`, which only raises EXP, after a backup).
 
 ---
 
@@ -133,7 +134,10 @@ the shortcut at the new version. You can then delete the old `OctopathWorldOverh
 - **Catch-up leveling**: off in the vanilla opening; from the chapter 2s it phases in with
   the rest of the world, up to 5× cheaper EXP for every level more than 2 below your highest
   active traveler. A benched or lagging traveler shoots up to about 3 levels under your
-  leaders and keeps pace with them, without grinding.
+  leaders and keeps pace with them, without grinding. Or set `catch_up = save`: before the
+  game starts, anyone more than 3 levels behind gets their EXP raised to that level's normal
+  total (the save is backed up first and only EXP changes), so they truly catch up after
+  their next battle.
 - **Higher caps**: stats 9,999 (from 999), HP 99,999 (from 9,999), damage 999,999.
 
 All of these can be switched off individually.

@@ -534,6 +534,11 @@ def prepare(argv, wrap):
         if save is None:
             print("Cancelled.")
             return None
+    if cfg.get("catch_up") == "save" and cfg["features"].get("catch_up_leveling")             and save != B.NEW_GAME:
+        save_summary(save)                    # sets the world's stage (vanilla opening: off)
+        if B.catchup_divisor() > 1:
+            import topup
+            topup.apply(save)
     update(save)
     return "--build" not in argv
 

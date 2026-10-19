@@ -96,6 +96,15 @@ preset = adaptive
 save_choice = ask
 ; seconds before the picker continues with the highlighted save
 ask_timeout = 20
+; How travelers far below your party catch up (needs catch_up_leveling = true):
+;   table - levels below your leaders cost up to 5x less EXP; your save is never touched,
+;           but a traveler who levelled cheaply owes the difference at the first normal
+;           level, so they settle ~3 levels behind your leaders
+;   save  - before the game starts, anyone more than 3 levels behind your highest active
+;           traveler gets their EXP raised to that level's normal total; the game hands out
+;           the levels after their next battle. Writes the save (backed up first; only the
+;           EXP numbers change).
+catch_up = table
 ; While you play, show a banner when your progress would make the world grow (it changes
 ; at the next launch). Set the game to borderless fullscreen to see it over the game:
 ; nothing can draw over exclusive fullscreen.
@@ -192,6 +201,9 @@ def load():
                        for k, d in FEATURES.items()}
     cfg["save_choice"] = cp.get("general", "save_choice", fallback="ask").strip().lower()
     cfg["ask_timeout"] = cp.getint("general", "ask_timeout", fallback=20)
+    cfg["catch_up"] = cp.get("general", "catch_up", fallback="table").strip().lower()
+    if cfg["catch_up"] not in ("table", "save"):
+        raise ValueError(f"overhaul.ini catch_up = {cfg['catch_up']}: expected table or save")
     cfg["world_notice"] = cp.getboolean("general", "world_notice", fallback=True)
     cfg["game_dir"] = cp.get("general", "game_dir", fallback="").strip()
     cfg["save_dir"] = cp.get("general", "save_dir", fallback="").strip()
@@ -225,7 +237,8 @@ def apply(cfg):
     B.RAISE_DAMAGE_CAP = f["raise_damage_cap"]
     B.PLAYER_STAT_CAP = 9999 if f["raise_stat_caps"] else 999
     B.PLAYER_HP_CAP = 99999 if f["raise_stat_caps"] else 9999
-    B.CATCHUP_LEVELING = f["catch_up_leveling"]
+    # catch_up = save tops up the save's EXP instead (topup.py); the table stays as shipped
+    B.CATCHUP_LEVELING = f["catch_up_leveling"] and cfg.get("catch_up", "table") == "table"
     B.SCALE_SUMMONS = f["scale_summons"] and f["scale_world"]
     B.SCALE_TRESSA_COLLECT = f["scale_tressa_collect"]
     build_all.NEW_GEAR = f["new_gear"]
