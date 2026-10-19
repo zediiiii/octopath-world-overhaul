@@ -471,7 +471,7 @@ def main(pak_path):
     if GR + ".uexp" in present:
         b_gr, m_gr = table(base, GR), table(mod, GR)
         party = B.party_level(B.quests_done()[0])
-        thr = party - B.CATCHUP_MARGIN
+        thr = B.catchup_threshold(B.quests_done()[0])
         moved_high = [k for k in b_gr if int(k) >= thr and
                       g(b_gr[k], "TotalExp") != g(m_gr[k], "TotalExp")]
         r.check(not moved_high, f"EXP totals unchanged from level {thr} up (party {party})",

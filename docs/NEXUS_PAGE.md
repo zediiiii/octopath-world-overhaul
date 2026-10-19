@@ -2,7 +2,7 @@
 
 **Name:** Orsterra Unbound - World Overhaul
 **Category:** Overhauls
-**Version:** 1.0.0-beta.8
+**Version:** 1.0.0-beta.9
 **Short description (350 chars max):** Vanilla chapter 1s, then a world that keeps up: enemies
 and bosses scale with your story and party, 560+ new multi-stat items up to level 104, stats past
 999, elemental boosts that work on accessories, fast travel to visited places, half the random
@@ -62,7 +62,7 @@ The whole journey stays a real fight — from the first chapter to the last boss
 [*]Fast travel to every location you've visited (unvisited places stay locked).
 [*]Evasive Maneuvers built in — half the random encounters, one support-skill slot freed.
 [*][b]Toggle dash[/b] (optional, toggle_dash = true): press dash once to run, again to walk. A small patch to the game's own controller — no script loader needed.
-[*]Catch-up leveling: off in the vanilla opening, then phasing in with the rest of the world, up to 5× cheaper EXP for every level more than 4 below your party's average — benched travelers shoot up to about 5 levels under the party and keep pace from there.
+[*]Catch-up leveling: off in the vanilla opening, then phasing in with the rest of the world, up to 5× cheaper EXP for every level more than 2 below your highest active traveler — benched or lagging travelers shoot up to about 3 levels under your leaders and keep pace from there.
 [/list]
 
 [size=5][b]Presets[/b][/size]

@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.0-beta.9
+
+- **Catch-up reaches your leaders:** the catch-up line is now your highest active
+  traveler's level - 2 (was the party average - 4). A cheaper table only affects levels a
+  traveler hasn't reached, so the leaders are never moved; everyone below climbs to about 3
+  levels under them. Before, a traveler 5-10 levels behind hit one level that charged the
+  whole EXP shortfall (e.g. 230,000+ EXP for a single level).
+
 ## 1.0.0-beta.8
 
 - **Runes for the whole party:** the Runelord's six elemental runes (all four levels) now

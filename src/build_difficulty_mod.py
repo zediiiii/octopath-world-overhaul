@@ -98,7 +98,8 @@ SCALE_REWARDS = True
 # Catch-up leveling. CharacterGrowData's TotalExp is one table shared by all eight characters
 # and the save stores cumulative EXP, so cheapening low levels must NOT lower the totals of
 # levels the main party has reached (they would level instantly). Every level below
-# (party average - CATCHUP_MARGIN) costs 1/CATCHUP_FACTOR of the EXP; the threshold level and
+# catchup_threshold() (the top active member's level - CATCHUP_MARGIN) costs 1/CATCHUP_FACTOR
+# of the EXP; the threshold level and
 # above are untouched. No ramp back to vanilla: a ramp charges the saved EXP back on the
 # levels just below the threshold (2-3x vanilla each - a traveler 5-10 levels behind levelled
 # SLOWER than the party). Instead the whole difference sits in the one step to the threshold,
@@ -106,7 +107,7 @@ SCALE_REWARDS = True
 # snaps up to one level under it and keeps pace about CATCHUP_MARGIN + 1 levels behind.
 CATCHUP_LEVELING = True
 CATCHUP_FACTOR = 5
-CATCHUP_MARGIN = 4
+CATCHUP_MARGIN = 2                # below the highest active party member (catchup_threshold)
 GROW = "Octopath_Traveler/Content/Character/Database/CharacterGrowData"
 
 # Steal odds come from level-difference thresholds: STEAL_PROBABILITY_LEVEL_OVER (2 / 4 / 11
@@ -560,6 +561,25 @@ def party_level(save_path):
     if not active:
         raise RuntimeError("no active party members found in the save")
     return round(sum(active) / len(active))
+
+
+def catchup_threshold(save_path):
+    """The first level catch-up leaves at its normal cost: the highest active party member's
+    level less CATCHUP_MARGIN. A cheaper table only matters for levels a traveler hasn't
+    reached, so the leaders - at or above the line - are never moved; everyone below
+    climbs to just under it (was: the party average - 4, which left a traveler 5-10 levels
+    behind facing one level that charged the whole shortfall)."""
+    if save_path == NEW_GAME:
+        return 1
+    s = gvas.SaveFile.load(save_path)
+    slot = {x.name.split("_")[0]: x for x in s.get("slotData").value}
+    ids = [getattr(x, "value", x) for x in slot["MainMemberCharacterID"].value]
+    top = 1
+    for m in s.get("PlayerMember").value:
+        f = {x.name.split("_")[0]: x.value for x in m}
+        if f["CharacterID"] in ids:
+            top = max(top, f["Level"])
+    return top - CATCHUP_MARGIN
 
 
 def build_curve(rows, boss_ids):
@@ -1093,7 +1113,7 @@ def build(out_path=None, save_path=None, verbose=True, pack=True):
         if [struct.unpack_from("<i", gue, o)[0] for o in tot_offs] != tot:
             raise RuntimeError("TotalExp offsets do not match parsed values")
         lv = [int(k) for k in gkeys]
-        threshold = party_lv - CATCHUP_MARGIN
+        threshold = catchup_threshold(save)
 
         def factor(level):
             return 1.0 if level >= threshold else 1.0 / cheapen
@@ -1118,7 +1138,7 @@ def build(out_path=None, save_path=None, verbose=True, pack=True):
             cheap = [L for L, a, b in zip(lv, tot, new_tot) if b < a]
             print(f"catch-up leveling: levels {min(cheap) if cheap else '-'}-"
                   f"{max(cheap) if cheap else '-'} cost {cheapen:.2g}x less EXP; "
-                  f"level {threshold}+ unchanged (party average {party_lv})")
+                  f"level {threshold}+ unchanged (top active party level {threshold + CATCHUP_MARGIN})")
 
     # ---------------- Tressa's Collect talent ----------------
     files_bparams = {}
