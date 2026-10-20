@@ -109,6 +109,12 @@ catch_up = table
 ; at the next launch). Set the game to borderless fullscreen to see it over the game:
 ; nothing can draw over exclusive fullscreen.
 world_notice = true
+; Mark side stories you haven't started: their giver is named "<name>" plus the leaf, and
+; the world map shows the leaf (or leaf 3 for three) after the place's name. Updated at
+; each launch. auto = once you've finished side_story_markers_from chapters (24 = every
+; chapter 3); on / off = always / never. The save picker's checkbox sets on / off.
+side_story_markers = auto
+side_story_markers_from = 24
 ; Leave empty to auto-detect.
 game_dir =
 save_dir =
@@ -160,6 +166,28 @@ def ini_path():
     return os.path.join(paths.app_dir(), "overhaul.ini")
 
 
+def set_general(key, value):
+    """Write one [general] setting into overhaul.ini, keeping every other line (and its
+    comments) as it is; adds the line if it's missing."""
+    import re
+    p = ini_path()
+    if not os.path.exists(p):
+        load()
+    with open(p, encoding="utf-8-sig") as f:
+        text = f.read()
+    line = f"{key} = {value}"
+    pat = re.compile(rf"^{re.escape(key)}\s*=.*$", re.M)
+    if pat.search(text):
+        text = pat.sub(line, text, count=1)
+    elif re.search(r"^\[general\][^\n]*\n", text, re.M):
+        text = re.sub(r"^\[general\][^\n]*\n", lambda m: m.group(0) + line + "\n", text,
+                      count=1, flags=re.M)
+    else:
+        text = f"[general]\n{line}\n\n" + text
+    with open(p, "w", encoding="utf-8") as f:
+        f.write(text)
+
+
 def load():
     p = ini_path()
     if not os.path.exists(p):
@@ -205,6 +233,11 @@ def load():
     if cfg["catch_up"] not in ("table", "save"):
         raise ValueError(f"overhaul.ini catch_up = {cfg['catch_up']}: expected table or save")
     cfg["world_notice"] = cp.getboolean("general", "world_notice", fallback=True)
+    cfg["markers"] = cp.get("general", "side_story_markers", fallback="auto").strip().lower()
+    if cfg["markers"] not in ("auto", "on", "off"):
+        raise ValueError(f"overhaul.ini side_story_markers = {cfg['markers']}: "
+                         f"expected auto, on or off")
+    cfg["markers_from"] = cp.getint("general", "side_story_markers_from", fallback=24)
     cfg["game_dir"] = cp.get("general", "game_dir", fallback="").strip()
     cfg["save_dir"] = cp.get("general", "save_dir", fallback="").strip()
     cfg["cap_test_charm"] = cp.getboolean("legacy", "cap_test_charm", fallback=False)
@@ -246,6 +279,8 @@ def apply(cfg):
     build_all.CONSUMABLE_UPGRADES = f["consumable_upgrades"]
     build_all.TOGGLE_DASH = f["toggle_dash"]
     build_all.JOURNAL_HINTS = f["journal_hints"]
+    import quest_markers
+    quest_markers.MODE, quest_markers.FROM = cfg["markers"], cfg["markers_from"]
     build_all.SCALE_SKILLS = f["scale_skills"]
     build_all.PARTY_RUNES = f["party_runes"]
     build_all.CAP_TEST_ITEM = cfg["cap_test_charm"]

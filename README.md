@@ -127,6 +127,11 @@ the shortcut at the new version. You can then delete the old `OctopathWorldOverh
   or piece of information (who to Purchase/Steal or Inquire/Scrutinize), the steps on the
   way, every way to finish it and the reward. Read from the game's own event, NPC and shop
   data - pair it with fast travel. Also as one document: [docs/SIDE_STORIES.md](docs/SIDE_STORIES.md).
+- **Side stories you haven't started are marked in the game**: the person who starts one is
+  named "Ali ⑳", and the world map adds the leaf to the place's name ("Grandport ⑳3" =
+  three to start there). Updated at every launch; a marker goes once the story begins.
+  Automatic once every chapter 3 is done (`side_story_markers = auto`,
+  `side_story_markers_from = 24`); the save picker has a checkbox to turn it on or off.
 - **Fast travel to every location you have visited** (dungeons, caves, shrines — not just
   towns). Places you've never been stay locked.
 - **Fewer random encounters**: Evasive Maneuvers is built in, so you get the support-skill

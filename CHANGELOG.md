@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.0-beta.10
+
+- **Side stories you haven't started are marked in the game:** the person who starts one is
+  named with the leaf ("Ali ⑳"), only on the placement that starts it, and the world map
+  adds the leaf to the place's name ("Grandport ⑳3": three begin there). Rebuilt from the
+  save at each launch, so a marker goes once its story begins. Automatic once 24 chapters
+  (every chapter 3) are done, so the opening isn't covered in leaves; the save picker has a
+  checkbox to turn it on or off (`side_story_markers = auto | on | off`,
+  `side_story_markers_from`). Givers who only appear after a later chapter count too.
+
 ## 1.0.0-beta.9
 
 - **Catch-up reaches your leaders:** the catch-up line is now your highest active

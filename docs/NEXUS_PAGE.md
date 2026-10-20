@@ -2,7 +2,7 @@
 
 **Name:** Orsterra Unbound - World Overhaul
 **Category:** Overhauls
-**Version:** 1.0.0-beta.9
+**Version:** 1.0.0-beta.10
 **Short description (350 chars max):** Vanilla chapter 1s, then a world that keeps up: enemies
 and bosses scale with your story and party, 560+ new multi-stat items up to level 104, stats past
 999, elemental boosts that work on accessories, fast travel to visited places, half the random
@@ -59,6 +59,7 @@ The whole journey stays a real fight — from the first chapter to the last boss
 [size=5][b]Quality of life[/b][/size]
 [list]
 [*][b]Side-story walkthroughs in the journal[/b]: every side story's journal entry lists each step with the town and region — who starts it, who to ask around, who to Purchase/Steal an item from or Inquire/Scrutinize for information, every way to finish it, and the reward. Read from the game's own event, NPC and shop data; pairs with fast travel.
+[*][b]Side stories you haven't started are marked[/b]: the quest-giver's name gets a leaf ("Ali ⑳") and so does the place on the world map ("Grandport ⑳3" = three begin there). Updated every launch; on automatically once every chapter 3 is done, or switch it with the checkbox in the save picker.
 [*]Fast travel to every location you've visited (unvisited places stay locked).
 [*]Evasive Maneuvers built in — half the random encounters, one support-skill slot freed.
 [*][b]Toggle dash[/b] (optional, toggle_dash = true): press dash once to run, again to walk. A small patch to the game's own controller — no script loader needed.

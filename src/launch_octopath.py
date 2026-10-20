@@ -89,9 +89,10 @@ def save_summary(path):
                 progress=progress)
 
 
-def pick_save(saves, timeout):
+def pick_save(saves, timeout, cfg=None):
     """Small window: which save are you about to play? Returns a path, NEW_GAME, or None
-    (cancel). Unreadable saves are left out; the last row is always "New game"."""
+    (cancel). Unreadable saves are left out; the last row is always "New game". A checkbox
+    turns the side-story markers on / off (written to overhaul.ini)."""
     import tkinter as tk
     from tkinter import ttk
     import build_difficulty_mod as B
@@ -127,6 +128,27 @@ def pick_save(saves, timeout):
                                                    s["chapters"], s["party"], s["danger"]))
     tv.selection_set("0")
     tv.pack(fill="both", expand=True)
+    mode = (cfg or {}).get("markers", "auto")
+    first = (cfg or {}).get("markers_from", 24)
+
+    def marked(i):
+        return mode == "on" or mode == "auto" and infos[i]["chapters"] >= first
+    v_mark = tk.BooleanVar(value=marked(0))
+    mark = {"touched": False}
+
+    def mark_touched():
+        mark["touched"] = True
+        touched()
+    hint = (f" - automatic once {first} chapters are done" if mode == "auto" else "")
+    ttk.Checkbutton(frm, variable=v_mark, command=mark_touched,
+                    text="Mark side stories I haven't started: their quest-giver and the "
+                         "world-map place get a leaf" + hint).pack(anchor="w", pady=(6, 0))
+
+    def selected(*_a):
+        sel = tv.selection()
+        if sel and not mark["touched"]:
+            v_mark.set(marked(int(sel[0])))
+    tv.bind("<<TreeviewSelect>>", selected)
     msg = ttk.Label(frm, text="")
     msg.pack(anchor="w", pady=(6, 0))
     left = {"t": timeout, "live": True}
@@ -134,6 +156,12 @@ def pick_save(saves, timeout):
     def go(*_a):
         sel = tv.selection()
         result["path"] = infos[int(sel[0])]["path"] if sel else infos[0]["path"]
+        if mark["touched"]:
+            import config
+            try:
+                config.set_general("side_story_markers", "on" if v_mark.get() else "off")
+            except OSError as exc:
+                print(f"could not save the side-story marker setting: {exc}")
         root.destroy()
 
     def cancel():
@@ -233,12 +261,14 @@ def update(save_path, log=print):
     import build_difficulty_mod as B
     import build_all
     import buildlog
+    import quest_markers
     cfg = config.apply(config.load())
     B.SELECTED_SAVE = save_path
     info = save_summary(save_path)
     want = {"save": os.path.normcase(save_path), "progress": info["progress"],
             "party_level": info["party_lv"], "floor": info["floor"],
             "side_all": info["side_all"],
+            "side_open": quest_markers.open_key(save_path),
             "config": config.fingerprint(cfg),
             "source": source_hash()}
     installed = os.path.join(paths.mods_dir(), build_all.OUT_NAME)
@@ -530,7 +560,7 @@ def prepare(argv, wrap):
     elif cfg["save_choice"] == "newest" or "--newest" in argv:
         save = max(saves, key=os.path.getmtime)
     else:
-        save = pick_save(saves, cfg["ask_timeout"])
+        save = pick_save(saves, cfg["ask_timeout"], cfg)
         if save is None:
             print("Cancelled.")
             return None

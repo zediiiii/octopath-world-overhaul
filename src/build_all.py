@@ -259,6 +259,13 @@ def main(out_path=None, install=False):
         import side_stories
         forge.text_ua, forge.text_ue = side_stories.add_walkthroughs(forge.text_ua, forge.text_ue,
                                                              log=print)
+    markers = None
+    import quest_markers
+    if quest_markers.wanted(B.SELECTED_SAVE):
+        try:
+            markers = quest_markers.Markers(forge, B.SELECTED_SAVE)
+        except Exception as exc:                         # noqa: BLE001 (an odd save: no markers)
+            print(f"side-story markers skipped: {exc}")
     tua, tue = dt.append_rows(forge.text_ua, forge.text_ue, forge.new_texts)
     dt.verify(iua, iue)
     dt.verify(tua, tue)
@@ -294,6 +301,8 @@ def main(out_path=None, install=False):
         ft = build_fasttravel_mod.patched_files(pak.Pak(paths.base_pak()))
         files.update(ft)
         print("fast travel enabled for every visited location")
+    if markers:
+        markers.apply(files, pak.Pak(paths.base_pak()))
 
     # ---- other installed mods replacing the same files ----
     # Text tables and CharacterGrowData are built ON TOP of other mods' copies; for anything
