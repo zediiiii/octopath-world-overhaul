@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0-beta.10
+## 1.0.0-beta.11
 
 - **Big hits show as thousands: "345k"** (`damage_k`). The game's damage numbers have only
   five digits, so with the cap at 999,999 a hit of 345,678 showed as 45,678. Damage and
@@ -15,6 +15,9 @@
   Throne Guardian) and the 10 regular enemies found only in those areas are built for it.
 - **EXP gear says it stacks** (read from the battle code: every EXP piece the party wears
   adds up, plus the best EXP support skill); JP / money still take the best item.
+
+## 1.0.0-beta.10
+
 - **Side stories you haven't started are marked in the game:** the person who starts one is
   named with the leaf ("Ali ⑳"), only on the placement that starts it, and the world map
   adds the leaf to the place's name ("Grandport ⑳3": three begin there). Rebuilt from the
