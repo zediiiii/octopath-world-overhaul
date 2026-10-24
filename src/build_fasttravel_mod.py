@@ -4,10 +4,6 @@ It flips the CanFastTravel flag in WorldMapTable for every real location (fields
 caves, shrines). It does NOT touch the save's VisitedMap, so places you have never been to
 stay locked exactly as before.
 
-It also clears LevelTable's ImpossibleFCFlag (no fast travel from here; the world map reads
-it) on the Gate of Finis, so you can travel out to restock and come back - the game sets it
-on those two levels only (plus one small event room, left alone).
-
 The 10 leftover demo rows (indexes 0-9, duplicates of real Cobbleston/Sunshade levels)
 are left alone so the world map doesn't get duplicate icons.
 """
@@ -24,16 +20,14 @@ import pakwrite
 TABLE = "Octopath_Traveler/Content/Level/Database/WorldMapTable"
 SKIP_ROWS = set(range(10))   # leftover demo rows duplicating real level IDs
 OUT_NAME = "FastTravelAnywhere_p.pak"
-LEVELS = "Octopath_Traveler/Content/Level/Database/LevelTable"
-TRAVEL_OUT_OF = ("D_Mount_3_3_A", "D_Mount_3_3_B")   # The Gate of Finis
 
 
-def flag_offsets(ua, ue, field="CanFastTravel"):
-    """Byte offset of each row's `field` (a BoolProperty) value, in row order."""
+def flag_offsets(ua, ue):
+    """Byte offset of each row's CanFastTravel value, in row order."""
     names, _ = uasset.names_of(ua)
-    prop = [n for n in names if n.startswith(field)]
+    prop = [n for n in names if n.startswith("CanFastTravel")]
     if len(prop) != 1:
-        raise RuntimeError(f"{field} name entry not found")
+        raise RuntimeError("CanFastTravel name entry not found")
     idx = names.index(prop[0])
     pat = struct.pack("<ii", idx, 0)
     offs = []
@@ -42,39 +36,15 @@ def flag_offsets(ua, ue, field="CanFastTravel"):
         tname = names[struct.unpack_from("<i", ue, o + 8)[0]]
         size, _i = struct.unpack_from("<ii", ue, o + 16)
         if tname != "BoolProperty" or size != 0:
-            raise RuntimeError(f"unexpected {field} layout")
+            raise RuntimeError("unexpected CanFastTravel layout")
         offs.append(o + 24)      # name(8) type(8) size(4) index(4) -> value byte
     return offs
 
 
 def patched_files(p=None, verbose=False):
-    """-> {path: bytes} for WorldMapTable with CanFastTravel on every real location, and
-    LevelTable letting you travel out of the Gate of Finis."""
+    """-> {path: bytes} for WorldMapTable with CanFastTravel on every real location."""
     p = p or pak.Pak(paths.base_pak())
-    files = build(p=p, verbose=verbose, pack=False)
-    files.update(gate_files(p))
-    return files
-
-
-def gate_files(p):
-    """LevelTable (as installed - another mod's copy if any) with ImpossibleFCFlag cleared on
-    the Gate of Finis levels."""
-    ua, ue, _src = paths.installed_asset(LEVELS, p)
-    ue = bytearray(ue)
-    rows = list(uasset.read_datatable(ua, bytes(ue)).items())
-    offs = flag_offsets(ua, bytes(ue), "ImpossibleFCFlag")
-    if len(offs) != len(rows):
-        raise RuntimeError(f"{len(offs)} ImpossibleFCFlag vs {len(rows)} LevelTable rows")
-    done = []
-    for (_k, v), o in zip(rows, offs):
-        name = next(vv for kk, vv in v.items() if kk.split("_")[0] == "LevelName")
-        if name in TRAVEL_OUT_OF and ue[o] == 1:
-            ue[o] = 0
-            done.append(name)
-    after = uasset.read_datatable(ua, bytes(ue))
-    if len(after) != len(rows):
-        raise RuntimeError("LevelTable no longer parses")
-    return {LEVELS + ".uasset": ua, LEVELS + ".uexp": bytes(ue)} if done else {}
+    return build(p=p, verbose=verbose, pack=False)
 
 
 def build(out_path=None, verbose=True, p=None, pack=True):

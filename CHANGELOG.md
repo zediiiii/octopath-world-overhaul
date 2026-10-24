@@ -9,12 +9,13 @@
   (every chapter 3) are done, so the opening isn't covered in leaves; the save picker has a
   checkbox to turn it on or off (`side_story_markers = auto | on | off`,
   `side_story_markers_from`). Givers who only appear after a later chapter count too.
-- **Fast travel out of the Gate of Finis** (the game blocks it there - LevelTable's
-  ImpossibleFCFlag), so you can leave to restock or buy the newest tier and come back.
-- **Fixed: 100% completion needed the final boss.** At Journey's End only finishes after
-  the Galdera fight, so it no longer counts: every side story but that one (100) completes
-  the side stories, makes Wayfarer's Laurel appear and lets relentless reach danger 104
-  before you face Galdera.
+- **The world peaks before the Gate of Finis.** Nothing inside it counts toward completion
+  any more: not its eight rematches, not the Gate itself, and not At Journey's End (which
+  only finishes after Galdera). Everything else - 32 chapters, 100 side stories, 10
+  optional bosses, 146 places - takes relentless to danger 104, so Grandport sells the
+  Mythic tier and Wayfarer's Laurel appears before you go in.
+- **A save point in the Gate of Finis** (the game has none in there): in the first hall,
+  beside the party monument. `gate_save_point`.
 
 ## 1.0.0-beta.9
 

@@ -282,13 +282,18 @@ FINAL_BOSS_DANGER = 0     # 0 = scale with the world like the other superbosses
 # this danger or the world's, whichever is higher (user 2026-10-04: "at least at 94").
 REVENANT_PREFIX = "BOS_Ext_Rev_"
 REVENANT_MIN_DANGER = 0
+# The Gate of Finis is the last stop: its eight rematches, the Gate itself and At Journey's
+# End (which finishes after Galdera) don't count toward completion, so the world reaches its
+# peak - and Grandport its newest tier - before you go in.
+GATE_LEVELS = {195, 196}
+GATE_BOSS_GROUP = "rematch"
 _COMPLETION_DATA = {}
 LAST_COMPLETION = None    # completion() of the save the last build() was made for
 
 
 def _completion_data():
     """(({area: [(slot, story)]}, number of side stories), {boss group: [EnemyID]},
-    [level IDs of each world-map location]) from the game data, cached. Only the 101 real side stories count, less At Journey's End, which finishes after Galdera (see side_stories.py): counting
+    [level IDs of each world-map location]) from the game data, cached. Only the 101 real side stories count (see side_stories.py), and nothing in the Gate of Finis (GATE_LEVELS): counting
     all 144 records made full completion - and the Wayfarer's Laurel - unreachable."""
     if not _COMPLETION_DATA:
         import side_stories
@@ -304,7 +309,7 @@ def _completion_data():
                 continue
             for rx, label in OPTIONAL_BOSS_GROUP:
                 m = rx.match(k)
-                if m:
+                if m and not label.startswith(GATE_BOSS_GROUP):
                     groups.setdefault(label.format(*m.groups()), []).append(g(v, "EnemyID"))
                     break
         wmap = uasset.read_datatable(p.read(WORLD_MAP + ".uasset"), p.read(WORLD_MAP + ".uexp"))
@@ -312,7 +317,7 @@ def _completion_data():
         for v in list(wmap.values())[WORLD_MAP_DEMO_ROWS:]:
             ids = {int(x) for x in list(g(v, "RefLevelName")) + [g(v, "MoveLevelName")]
                    if x and x != "None"}
-            if ids:
+            if ids and not ids & GATE_LEVELS:
                 places.append(ids)
         _COMPLETION_DATA.update(per_area=per_area, groups=groups, places=places)
     return _COMPLETION_DATA["per_area"], _COMPLETION_DATA["groups"]

@@ -133,7 +133,7 @@ the shortcut at the new version. You can then delete the old `OctopathWorldOverh
   Automatic once every chapter 3 is done (`side_story_markers = auto`,
   `side_story_markers_from = 24`); the save picker has a checkbox to turn it on or off.
 - **Fast travel to every location you have visited** (dungeons, caves, shrines — not just
-  towns), and out of the Gate of Finis. Places you've never been stay locked.
+  towns). Places you've never been stay locked.
 - **Fewer random encounters**: Evasive Maneuvers is built in, so you get the support-skill
   slot back.
 - **Catch-up leveling**: off in the vanilla opening; from the chapter 2s it phases in with

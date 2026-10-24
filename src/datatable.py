@@ -64,7 +64,7 @@ def field_offsets_in(ue, names, lo, hi, field, kind="IntProperty", exact=False):
         tname = names[struct.unpack_from("<i", ue, p + 8)[0]]
         if tname == kind:
             size = struct.unpack_from("<i", ue, p + 16)[0]
-            if kind == "IntProperty" and size == 4:
+            if kind in ("IntProperty", "FloatProperty") and size == 4:
                 out.append(p + 25)          # name8 type8 size4 index4 hasguid1
             elif kind == "NameProperty" and size == 8:
                 out.append(p + 25)

@@ -78,6 +78,7 @@ FEATURES = {
     "scale_skills": True,         # fixed HP/SP restores of party skills grow with the world
     "party_runes": True,          # the Runelord's elemental runes enchant the whole party
     "journal_hints": True,        # side-story journal entries: step-by-step walkthroughs
+    "gate_save_point": True,      # a save point in the Gate of Finis's first hall
 }
 
 DEFAULT_INI = """\
@@ -138,6 +139,8 @@ scale_skills = true
 party_runes = true
 ; side-story journal entries become step-by-step walkthroughs (who, where, region)
 journal_hints = true
+; a save point in the Gate of Finis's first hall (the game has none in there)
+gate_save_point = true
 
 [tuning]
 ; true = the chapter 1s play as vanilla and the preset's values below build up through
@@ -279,6 +282,7 @@ def apply(cfg):
     build_all.CONSUMABLE_UPGRADES = f["consumable_upgrades"]
     build_all.TOGGLE_DASH = f["toggle_dash"]
     build_all.JOURNAL_HINTS = f["journal_hints"]
+    build_all.GATE_SAVE = f["gate_save_point"]
     import quest_markers
     quest_markers.MODE, quest_markers.FROM = cfg["markers"], cfg["markers_from"]
     build_all.SCALE_SKILLS = f["scale_skills"]
