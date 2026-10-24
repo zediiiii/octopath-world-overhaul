@@ -2,7 +2,7 @@
 
 ## 1.0.0-beta.10
 
-- **Wayfarer's Laurel pays x10 JP and money** (was x3, the same as Fortune's Purse). Only the
+- **Wayfarer's Laurel pays x13 JP and money** (was x3, the same as Fortune's Purse). Only the
   best JP / money item counts (Laurels don't stack with each other or the Purse).
 - **Hard areas top out at danger 108** (world + 12, at most 108; Galdera stays at 104).
 - **Hard areas are as tough as they say (relentless):** the danger shown for optional
