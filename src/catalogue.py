@@ -307,7 +307,9 @@ def describe(stats, ails, immune=()):
         for a, label in (("EXPUP", "party EXP (stacks)"),
                          ("JPUP", "party JP and money (best one counts)")):
             if a in gains:
-                equip.append(f"+{gains[a] - 100}% {label}")
+                # big multipliers read shorter as "x13" than "+1200%" (3-line limit)
+                v = gains[a]
+                equip.append((f"x{v / 100:g}" if v >= 1000 else f"+{v - 100}%") + f" {label}")
     # How these combine was read from BattlePlayerBP: each element's boosts are summed over
     # every equipped piece (100% + sum of (value - 100)) and the total multiplies the hit
     # after skills and buffs; resistances sum the same way, down to 0% (immune).
