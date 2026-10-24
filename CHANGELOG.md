@@ -2,6 +2,12 @@
 
 ## 1.0.0-beta.10
 
+- **Hard areas are as tough as they say (relentless):** the danger shown for optional
+  areas (world + 12) was only a label - their bosses were built for the world's danger.
+  Now the shrine bosses, the beasts (Everhold's Managarmr, the caves, the Hollow Throne's
+  Throne Guardian) and the 10 regular enemies found only in those areas are built for it.
+- **EXP gear says it stacks** (read from the battle code: every EXP piece the party wears
+  adds up, plus the best EXP support skill); JP / money still take the best item.
 - **Side stories you haven't started are marked in the game:** the person who starts one is
   named with the leaf ("Ali ⑳"), only on the placement that starts it, and the world map
   adds the leaf to the place's name ("Grandport ⑳3": three begin there). Rebuilt from the

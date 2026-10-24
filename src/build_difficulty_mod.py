@@ -93,6 +93,34 @@ SET_ENEMY_LEVEL = "party"
 HARD_AREA_THRESHOLD = 50  # areas at/above this are "optional / hard"...
 HARD_AREA_DANGER = 70     # ...and get this danger level (or floor+margin, whichever is higher)
 HARD_AREA_MARGIN = 12
+# With HARD_AREA_DISPLAY the hard areas' danger is real, not just shown: their optional
+# superbosses (shrine bosses, the beasts in Everhold, the caves and the Hollow Throne) and
+# the regular enemies found only there are built for that danger (user 2026-10-24: Everhold
+# showed 114 while Managarmr had world-102 HP).
+HARD_AREA_SUPERBOSSES = ("BOS_Ext_Job_", "EVE_EXT_")
+
+
+def hard_danger(floor):
+    """The danger of the optional / hard areas: a step above the world, never below it."""
+    return max(HARD_AREA_DANGER, floor + HARD_AREA_MARGIN)
+
+
+def hard_area_enemies(p, cls):
+    """Regular enemies that only appear in hard areas (vanilla danger >= the threshold)."""
+    def table(path):
+        return uasset.read_datatable(p.read(path + ".uasset"), p.read(path + ".uexp"))
+    eg, be, vol = table(ENEMY_GROUPS), table(ENCOUNTERS), table(VOLUME)
+    seen = {}
+    for v in vol.values():
+        for e in g(v, "EncounterList"):
+            n, d = g(e, "EncounterName"), g(e, "DangerLevel")
+            if n not in be or d <= 0:
+                continue
+            for x in g(be[n], "Group"):
+                for en in (g(eg[g(x, "GroupID")], "EnemyID") if g(x, "GroupID") in eg else ()):
+                    if en and en != "None":
+                        seen[en] = min(seen.get(en, d), d)
+    return {k for k, d in seen.items() if d >= HARD_AREA_THRESHOLD and cls.get(k) == "random"}
 BOSS_HP_MULT = 2.0        # user 2026-10-04: 2x (Winnehild's Battle Cry ~24k x6 must not end fights in two turns)
 SCALE_REWARDS = True
 # Catch-up leveling. CharacterGrowData's TotalExp is one table shared by all eight characters
@@ -773,6 +801,14 @@ def build(out_path=None, save_path=None, verbose=True, pack=True):
     money_ratio = target["Money"] / ref["Money"] if ref.get("Money") else 1.0
     cls = enemy_classes(p, rows)
     natives = boss_natives(p, rows, cls, curve, levels)
+    hard_only, hard_at, hard_pay = set(), None, None
+    if HARD_AREA_DISPLAY:
+        hard_only = hard_area_enemies(p, cls)
+        hard_at = profile_at(curve, levels, hard_danger(floor))
+        hard_pay = dict(hard_at)
+        grown = profile_at(curve, levels, reward_floor + hard_danger(floor) - floor)
+        for f in GROWTH_REWARDS:
+            hard_pay[f] = grown[f]
 
     level_to = round(party_lv * ENEMY_LEVEL_WEIGHT) if SET_ENEMY_LEVEL == "party" else floor
 
@@ -821,6 +857,8 @@ def build(out_path=None, save_path=None, verbose=True, pack=True):
                 pin = FINAL_BOSS_DANGER
             elif REVENANT_MIN_DANGER > floor and k.startswith(REVENANT_PREFIX):
                 pin = REVENANT_MIN_DANGER
+            elif HARD_AREA_DISPLAY and k.startswith(HARD_AREA_SUPERBOSSES):
+                pin = hard_danger(floor)
             scale_boss(i, extra_hp=SUPERBOSS_HP_MULT, extra_all=SUPERBOSS_EXTRA,
                        to=profile_at(curve, levels, pin) if pin else None)
             touched["superboss"] += 1
@@ -842,7 +880,7 @@ def build(out_path=None, save_path=None, verbose=True, pack=True):
             old = struct.unpack_from("<i", ue, o)[0]
             if old <= 0:                      # 0 means "not used" for some rows; leave it
                 continue
-            new = max(old, target[f])
+            new = max(old, (hard_at if k in hard_only else target)[f])
             if new != old:
                 struct.pack_into("<i", ue, o, new)
                 expected.add(o)
@@ -855,7 +893,7 @@ def build(out_path=None, save_path=None, verbose=True, pack=True):
                 old = struct.unpack_from("<i", ue, o)[0]
                 if old <= 0:
                     continue
-                new = max(old, pay[f])
+                new = max(old, (hard_pay if k in hard_only else pay)[f])
                 if new != old:
                     struct.pack_into("<i", ue, o, new)
                     expected.add(o)
@@ -866,6 +904,10 @@ def build(out_path=None, save_path=None, verbose=True, pack=True):
               f"{touched['boss']} bosses and {touched['superboss']} superbosses scaled from "
               f"their native danger ({behind} built for less than {floor}), extra HP "
               f"x{BOSS_HP_MULT} / x{SUPERBOSS_HP_MULT}")
+        if HARD_AREA_DISPLAY:
+            print(f"hard areas fought at danger {hard_danger(floor)}: "
+                  f"{len(hard_only)} regular enemies found only there and the optional "
+                  f"superbosses ({', '.join(HARD_AREA_SUPERBOSSES)})")
         print(f"         left as shipped: {touched['npc']} Provoke/Challenge opponents, "
               f"{touched['cat']} caits, {touched['other']} unreachable rows")
 
@@ -984,7 +1026,7 @@ def build(out_path=None, save_path=None, verbose=True, pack=True):
                   f"({steps_changed} values across {len(vols)} areas) - no skill slot needed")
 
     # hard/optional areas stay a step above the rest of the world, never below it
-    hard_target = max(HARD_AREA_DANGER, floor + HARD_AREA_MARGIN)
+    hard_target = hard_danger(floor)
     hard_display = HARD_AREA_DISPLAY
     for (k, e), o in zip(flat, doffs):
         old = struct.unpack_from("<i", ue2, o)[0]
