@@ -67,9 +67,10 @@ LAUREL_NAME = "Wayfarer's Laurel"
 LAUREL_STATS = dict({k: 1500 for k in ("ATK", "DEF", "MATK", "MDEF", "ACC", "EVA", "CON",
                                        "AGI")}, HP=5000, MP=500)
 LAUREL_EFFECTS = [("ADD_MP_FIXED_REGENERATION", 25), ("ADD_HP_FIXED_REGENERATION", 1000),
-                  ("EXPUP", 200), ("JPUP", 600)]
+                  ("EXPUP", 200), ("JPUP", 1000)]
 # JP / money items don't add up (only the best counts - and multiplying them would make four
-# Purses x81), so the Laurel doubles the Purse on its own: x6 JP and money (user 2026-10-24).
+# Purses x81), so the Laurel is x10 JP and money on its own (user 2026-10-24: "just make
+# laurel X10").
 LAUREL_PRICE = 500000
 # Money x3 (and JP x3): JP-up gear raises battle money too (blueprint_patch.py). Always sold.
 PURSE_NAME = "Fortune's Purse"
