@@ -2,6 +2,9 @@
 
 ## 1.0.0-beta.10
 
+- **Wayfarer's Laurel pays x6 JP and money** (was x3, the same as Fortune's Purse). Only the
+  best JP / money item counts, so it doubles the Purse on its own.
+- **Hard areas top out at danger 108** (world + 12, at most 108; Galdera stays at 104).
 - **Hard areas are as tough as they say (relentless):** the danger shown for optional
   areas (world + 12) was only a label - their bosses were built for the world's danger.
   Now the shrine bosses, the beasts (Everhold's Managarmr, the caves, the Hollow Throne's

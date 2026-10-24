@@ -46,7 +46,7 @@ The whole journey stays a real fight — from the first chapter to the last boss
 [*][b]Runes for the whole party[/b]: the Runelord's six elemental runes enchant every ally's weapons (Transfer Rune unchanged).
 [*]Gear you already own is never changed. New gear sells back for half its price, so you can try it on.
 [*][b]Fortune's Purse[/b]: triple JP and battle money (the best JP/money item worn counts; they don't stack).
-[*][b]Wayfarer's Laurel[/b]: appears in Grandport once you've finished every side story (At Journey's End, which ends after the final boss, isn't needed) — +1,500 to every stat, regeneration, more EXP, JP and money.
+[*][b]Wayfarer's Laurel[/b]: appears in Grandport once you've finished every side story (At Journey's End, which ends after the final boss, isn't needed) — +1,500 to every stat, regeneration, double EXP, and ×6 JP and money (twice Fortune's Purse).
 [*][b]Unbound Crown[/b]: +3,000 to every stat, dropped by Galdera.
 [/list]
 

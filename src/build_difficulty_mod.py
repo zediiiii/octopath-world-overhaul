@@ -100,9 +100,13 @@ HARD_AREA_MARGIN = 12
 HARD_AREA_SUPERBOSSES = ("BOS_Ext_Job_", "EVE_EXT_")
 
 
+HARD_AREA_CAP = 108       # user 2026-10-24: hard areas top out at 108 (Galdera: 104)
+
+
 def hard_danger(floor):
-    """The danger of the optional / hard areas: a step above the world, never below it."""
-    return max(HARD_AREA_DANGER, floor + HARD_AREA_MARGIN)
+    """The danger of the optional / hard areas: a step above the world, never below it,
+    and never past HARD_AREA_CAP."""
+    return min(HARD_AREA_CAP, max(HARD_AREA_DANGER, floor + HARD_AREA_MARGIN))
 
 
 def hard_area_enemies(p, cls):
