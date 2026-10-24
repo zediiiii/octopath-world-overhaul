@@ -9,6 +9,12 @@
   (every chapter 3) are done, so the opening isn't covered in leaves; the save picker has a
   checkbox to turn it on or off (`side_story_markers = auto | on | off`,
   `side_story_markers_from`). Givers who only appear after a later chapter count too.
+- **Fast travel out of the Gate of Finis** (the game blocks it there - LevelTable's
+  ImpossibleFCFlag), so you can leave to restock or buy the newest tier and come back.
+- **Fixed: 100% completion needed the final boss.** At Journey's End only finishes after
+  the Galdera fight, so it no longer counts: every side story but that one (100) completes
+  the side stories, makes Wayfarer's Laurel appear and lets relentless reach danger 104
+  before you face Galdera.
 
 ## 1.0.0-beta.9
 

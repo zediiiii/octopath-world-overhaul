@@ -288,12 +288,12 @@ LAST_COMPLETION = None    # completion() of the save the last build() was made f
 
 def _completion_data():
     """(({area: [(slot, story)]}, number of side stories), {boss group: [EnemyID]},
-    [level IDs of each world-map location]) from the game data, cached. Only the 101 real side stories count (see side_stories.py): counting
+    [level IDs of each world-map location]) from the game data, cached. Only the 101 real side stories count, less At Journey's End, which finishes after Galdera (see side_stories.py): counting
     all 144 records made full completion - and the Wayfarer's Laurel - unreachable."""
     if not _COMPLETION_DATA:
         import side_stories
         p = pak.Pak(paths.base_pak())
-        per_area = side_stories.slots()
+        per_area = side_stories.slots(countable=True)
         rows = uasset.read_datatable(p.read(ENEMY + ".uasset"), p.read(ENEMY + ".uexp"))
         uses = {}
         for v in rows.values():

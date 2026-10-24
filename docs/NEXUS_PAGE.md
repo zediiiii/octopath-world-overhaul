@@ -46,7 +46,7 @@ The whole journey stays a real fight — from the first chapter to the last boss
 [*][b]Runes for the whole party[/b]: the Runelord's six elemental runes enchant every ally's weapons (Transfer Rune unchanged).
 [*]Gear you already own is never changed. New gear sells back for half its price, so you can try it on.
 [*][b]Fortune's Purse[/b]: triple JP and battle money (the best JP/money item worn counts; they don't stack).
-[*][b]Wayfarer's Laurel[/b]: appears in Grandport once you've finished all 101 side stories — +1,500 to every stat, regeneration, more EXP, JP and money.
+[*][b]Wayfarer's Laurel[/b]: appears in Grandport once you've finished every side story (all but At Journey's End, which ends after the final boss) — +1,500 to every stat, regeneration, more EXP, JP and money.
 [*][b]Unbound Crown[/b]: +3,000 to every stat, dropped by Galdera.
 [/list]
 
@@ -60,7 +60,7 @@ The whole journey stays a real fight — from the first chapter to the last boss
 [list]
 [*][b]Side-story walkthroughs in the journal[/b]: every side story's journal entry lists each step with the town and region — who starts it, who to ask around, who to Purchase/Steal an item from or Inquire/Scrutinize for information, every way to finish it, and the reward. Read from the game's own event, NPC and shop data; pairs with fast travel.
 [*][b]Side stories you haven't started are marked[/b]: the quest-giver's name gets a leaf ("Ali ⑳") and so does the place on the world map ("Grandport ⑳3" = three begin there). Updated every launch; on automatically once every chapter 3 is done, or switch it with the checkbox in the save picker.
-[*]Fast travel to every location you've visited (unvisited places stay locked).
+[*]Fast travel to every location you've visited (unvisited places stay locked), and out of the Gate of Finis.
 [*]Evasive Maneuvers built in — half the random encounters, one support-skill slot freed.
 [*][b]Toggle dash[/b] (optional, toggle_dash = true): press dash once to run, again to walk. A small patch to the game's own controller — no script loader needed.
 [*]Catch-up leveling: off in the vanilla opening, then phasing in with the rest of the world, up to 5× cheaper EXP for every level more than 2 below your highest active traveler — benched or lagging travelers shoot up to about 3 levels under your leaders and keep pace from there. Optional catch_up = save tops up their EXP instead, so they truly catch up.

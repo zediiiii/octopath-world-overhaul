@@ -33,6 +33,9 @@ KNOW, KNOW_OR_HOLD, LEAD_OR_KNOW, EXAMINE = 14, 16, 17, 0
 LEAD_ALT = (10, 12)                  # guide / allure this person (no parameters)
 LEAF = "⑳"                       # the leaf symbol, as Side Stories Helper writes rewards
 DASH = "–"
+# At Journey's End's last part is the fight with Galdera, and it finishes at Hornburg after
+# it - so it can't count toward the completion (and Wayfarer's Laurel) you need for that fight
+AFTER_LAST_BOSS = "SMR_SS_EX4_0137"
 _CACHE = {}
 
 
@@ -131,14 +134,16 @@ def stories():
     return _data()["stories"]
 
 
-def slots():
+def slots(countable=False):
     """-> ({area index: [(position in the save's MissionState list, story group)]}, number
-    of real side stories). A group counts as done when any of its records is."""
+    of real side stories). A group counts as done when any of its records is. countable:
+    leave out the one that ends after the last boss (AFTER_LAST_BOSS)."""
+    real = [s for s in stories() if s["real"]
+            and not (countable and s["group"] == AFTER_LAST_BOSS)]
     out = collections.defaultdict(list)
-    for s in stories():
-        if s["real"]:
-            out[s["area"]].append((s["pos"], s["group"]))
-    return dict(out), len({s["group"] for s in stories() if s["real"]})
+    for s in real:
+        out[s["area"]].append((s["pos"], s["group"]))
+    return dict(out), len({s["group"] for s in real})
 
 
 
