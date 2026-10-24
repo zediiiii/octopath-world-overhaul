@@ -297,12 +297,14 @@ def describe(stats, ails, immune=()):
         else:
             attack.append(f"{rate}% chance each: " + "; ".join(DEBUFF_TEXT[n] for n in names)
                           + dur)
-    # JP-up gear also raises battle money by the same amount (blueprint_patch.py)
+    # JP-up gear also raises battle money by the same amount (blueprint_patch.py). EXP gear
+    # adds up (BattleManagerBP.SetEXPRatioByEquipment sums every piece the party wears, and
+    # CalcGetReward adds that to the best EXP support skill); JP / money take the best one.
     if gains.get("EXPUP") is not None and gains.get("EXPUP") == gains.get("JPUP"):
         equip.append(f"+{gains['EXPUP'] - 100}% party EXP, JP and money "
-                     f"(JP/money: best one counts)")
+                     f"(EXP stacks; JP/money: best one counts)")
     else:
-        for a, label in (("EXPUP", "party EXP"),
+        for a, label in (("EXPUP", "party EXP (stacks)"),
                          ("JPUP", "party JP and money (best one counts)")):
             if a in gains:
                 equip.append(f"+{gains[a] - 100}% {label}")
