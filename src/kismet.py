@@ -248,3 +248,108 @@ def disassemble(pkg, index, past_end=False):
     if d.mem != mem or d.p != size:
         raise RuntimeError(f"disassembly out of step: {d.p}/{size} bytes, {d.mem}/{mem} memory")
     return st
+
+
+# ---- growing a function: code appended after END, reached by redirected statements -------
+# Existing statements never move, so no jump target changes. A statement is redirected by
+# overwriting it in place with JUMP <new code> plus unreachable padding of the same disk AND
+# in-memory size (EX_Nothing is 1/1 byte, a local variable 5/9), so everything after it
+# keeps its offset.
+
+def spans(pkg, index):
+    """-> [(in-memory offset, offset in the script, bytes, text)] of every statement,
+    including any code after END."""
+    off, size, _mem = pkg.script(index)
+    code = pkg.ue[off:off + size]
+    d = Disassembler(pkg, code)
+    out = []
+    while d.p < size:
+        m, p0 = d.mem, d.p
+        s = d.expr()
+        out.append((m, p0, code[p0:d.p], s))
+    return out
+
+
+def mem_size(pkg, code):
+    """In-memory size of a run of whole expressions."""
+    d = Disassembler(pkg, code)
+    while d.p < len(code):
+        d.expr()
+    return d.mem
+
+
+def jump_padding(pkg, target, disk, mem, local):
+    """JUMP target, padded to exactly disk / mem bytes with EX_Nothing and reads of local
+    (an export index of a local variable of the function)."""
+    locals_, extra = divmod(mem - disk, 4)
+    nothing = disk - 5 - 5 * locals_
+    if extra or nothing < 0:
+        raise ValueError(f"cannot pad a jump to {disk} disk / {mem} memory bytes")
+    code = b"\x06" + struct.pack("<I", target) + b"\x0b" * nothing \
+        + (b"\x00" + struct.pack("<i", local)) * locals_
+    assert len(code) == disk and mem_size(pkg, code) == mem
+    return code
+
+
+def replace_script(ua, ue, index, code):
+    """-> (ua, ue) with the function's bytecode replaced by code (which may be longer):
+    updates the script's two sizes, the export's SerialSize, later exports' SerialOffset
+    and the summary's BulkDataStartOffset. Every other export stays byte-identical."""
+    import datatable as dt
+    pkg = Package(ua, ue)
+    off, size, _mem = pkg.script(index)
+    grow = len(code) - size
+    out_ue = bytearray(ue[:off - 8]) + struct.pack("<ii", mem_size(pkg, code), len(code)) \
+        + code + ue[off + size:]
+    s = dt.package_summary(ua)
+    out_ua = bytearray(ua)
+    eo = s["ExportOffset"][1]
+    e = pkg.exports[index - 1]
+    for i, x in enumerate(pkg.exports):
+        base = eo + i * 104
+        if struct.unpack_from("<qq", out_ua, base + 28) != (x["size"], x["off"] + pkg.header):
+            raise RuntimeError("export table layout not as expected")
+        if i + 1 == index:
+            struct.pack_into("<q", out_ua, base + 28, x["size"] + grow)
+        elif x["off"] > e["off"]:
+            struct.pack_into("<q", out_ua, base + 36, x["off"] + pkg.header + grow)
+    bo, bv = s["BulkDataStartOffset"]
+    struct.pack_into("<q", out_ua, bo, bv + grow)
+    out_ua, out_ue = bytes(out_ua), bytes(out_ue)
+    new = Package(out_ua, out_ue)
+    for i, (a, b) in enumerate(zip(pkg.exports, new.exports)):
+        if i + 1 != index and ue[a["off"]:a["off"] + a["size"]] != out_ue[b["off"]:b["off"] + b["size"]]:
+            raise RuntimeError(f"replace_script: export {a['name']} changed")
+    return out_ua, out_ue
+
+
+def bad_jumps(pkg, index):
+    """Statement-level JUMP / JUMPIFNOT / PUSHFLOW targets that don't land on a statement."""
+    import re
+    st = disassemble(pkg, index, past_end=True)
+    starts = {m for m, _s in st}
+    return [(m, s) for m, s in st
+            for t in re.findall(r"^(?:JUMP|JUMPIFNOT|PUSHFLOW) (\d+)", s)
+            if int(t) not in starts]
+
+
+def assemble(pkg, start, parts):
+    """Lay out new code that will sit at in-memory offset start. parts are bytes,
+    ("label", name), ("jump", name or offset) or ("jumpifnot", name, condition bytes).
+    -> (code, in-memory offset just past it)."""
+    labels = {}
+    for _ in range(2):                  # jump sizes are fixed, so the 2nd pass is final
+        out, at = b"", start
+        for x in parts:
+            if isinstance(x, bytes):
+                b = x
+            elif x[0] == "label":
+                labels[x[1]] = at
+                continue
+            elif x[0] == "jump":
+                b = b"\x06" + struct.pack("<I", x[1] if isinstance(x[1], int) else labels.get(x[1], 0))
+            else:
+                b = b"\x07" + struct.pack("<I", labels.get(x[1], 0)) + x[2]
+            out += b
+            at += mem_size(pkg, b)
+    return out, at

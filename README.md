@@ -144,6 +144,8 @@ the shortcut at the new version. You can then delete the old `OctopathWorldOverh
   total (the save is backed up first and only EXP changes), so they truly catch up after
   their next battle.
 - **Higher caps**: stats 9,999 (from 999), HP 99,999 (from 9,999), damage 999,999.
+  The game's damage numbers have five digits, so hits of 100,000 or more show as thousands
+  with a "k" ("345k"; `damage_k`).
 
 All of these can be switched off individually.
 

@@ -1,3 +1,6 @@
 # The mod itself needs only the Python standard library (3.10+, with tkinter).
-# This is for dev/ screenshots.
+# This is for dev/ tools (screenshots, the damage font glyph).
 pillow
+# dev/make_damage_k.py
+numpy
+scipy

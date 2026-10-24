@@ -52,7 +52,7 @@ The whole journey stays a real fight — from the first chapter to the last boss
 
 [size=5][b]Beyond every cap[/b][/size]
 [list]
-[*]Stats up to 9,999, HP up to 99,999, damage up to 999,999.
+[*]Stats up to 9,999, HP up to 99,999, damage up to 999,999. Hits of 100,000+ show as thousands with a "k" ("345k") — the game's damage numbers only have five digits, so the battle font gets a matching "k".
 [*][b]Elemental damage boosts on armour and accessories actually work.[/b] The game only counted them on weapons; a 4-byte patch to its battle code makes it count every equipped piece. Boosts of one element add up across your gear and multiply with your skills.
 [/list]
 

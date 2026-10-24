@@ -13,6 +13,7 @@ backing up only the slot you edit is not enough.
 | `bootcheck.ps1` | launch via Steam, confirm the game stays up, close it |
 | `run_damage_test.ps1` | load the newest save, walk into a fight, screenshot every action (leaves the game running - close it) |
 | `damage_test.py` | build a test pak with throwaway items + fast encounters and equip them (`--restore` to undo) |
+| `make_damage_k.py` | redraw the battle font's "k" (`src/data/damage_k.bin`; needs pillow, numpy, scipy, Windows' Times New Roman) |
 | `screenshot.ps1`, `input.ps1` | capture the screen / send keys to the game window |
 
 Keep test scripts that change the pak **outside** `src/`: the launcher rebuilds when a source

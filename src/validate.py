@@ -451,6 +451,17 @@ def main(pak_path):
         r.check(good, "dash toggle patch exactly as planned (ActionController_Impl)",
                 "ActionController_Impl differs from the planned dash-toggle patch")
 
+    import damage_k
+    if damage_k.WIDGET + ".uexp" in present:
+        problems = damage_k.check(base, mod)
+        r.check(not problems, "big damage numbers show as thousands with a k: widget, font "
+                              "atlases and materials exactly as planned (BattleDamageNumber)",
+                "; ".join(problems))
+    else:
+        import build_all
+        if build_all.DAMAGE_K:
+            r.check(False, "", "damage_k patch missing: hits over 99,999 lose their first digit")
+
     # ---- 5b. battle tunables: only Tressa's Collect amounts, and only upward ----
     BP = B.BATTLE_PARAMS
     if BP + ".uexp" in present:
@@ -491,6 +502,8 @@ def main(pak_path):
     for path in sorted({n[:-len(".uexp")] for n in present if n.endswith(".uexp")}):
         if path in (blueprint_patch.ASSET, blueprint_patch.MANAGER, blueprint_patch.ACTION):
             continue                            # a blueprint, checked byte-exactly in [5a]
+        if path in damage_k.ASSETS:
+            continue                            # widget / texture / material, checked in [5a]
         try:
             dt.verify(mod.read(path + ".uasset"), mod.read(path + ".uexp"))
             r.ok(f"{path.split('/')[-1]} structure OK")

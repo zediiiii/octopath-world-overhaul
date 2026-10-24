@@ -116,8 +116,8 @@ def main():
     for f in glob.glob(os.path.join(ROOT, "src", "*.py")):
         shutil.copy2(f, app)
     os.makedirs(os.path.join(out, "data"))
-    shutil.copy2(os.path.join(ROOT, "src", "data", "item_registry.json"),
-                 os.path.join(out, "data"))
+    for f in ("item_registry.json", "damage_k.bin"):
+        shutil.copy2(os.path.join(ROOT, "src", "data", f), os.path.join(out, "data"))
     for f in ("README.md", "LICENSE", "CHANGELOG.md"):
         shutil.copy2(os.path.join(ROOT, f), out)
 

@@ -53,6 +53,7 @@ SCALE_SKILLS = True        # overhaul.ini [features] scale_skills (skills.py)
 PARTY_RUNES = True         # overhaul.ini [features] party_runes (skills.py)
 JOURNAL_HINTS = True       # overhaul.ini [features] journal_hints (side_stories.py)
 GATE_SAVE = True           # overhaul.ini [features] gate_save_point (gate_save.py)
+DAMAGE_K = True            # overhaul.ini [features] damage_k (damage_k.py)
 CAP_TEST_IN_SHOP = False
 
 # The final boss's prize (user 2026-10-04): +3000 to every stat, dropped by Galdera on
@@ -299,6 +300,10 @@ def main(out_path=None, install=False):
         import blueprint_patch
         files.update(blueprint_patch.dash_toggle_files(pak.Pak(paths.base_pak())))
         print("dash button toggles running (press once to run, again to walk)")
+    if DAMAGE_K:
+        import damage_k
+        files.update(damage_k.patched_files(pak.Pak(paths.base_pak())))
+        print("damage numbers of 100,000+ show as thousands (345k)")
 
     if FAST_TRAVEL:
         import build_fasttravel_mod

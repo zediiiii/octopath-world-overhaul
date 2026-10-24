@@ -111,6 +111,23 @@ swaps, 4 bytes, no jump moves. It refuses to patch anything but the exact shippe
 `validate.py` re-derives the patch and compares byte for byte. Verified in-game: x10 Fire on
 two accessories multiplied Cyrus's spell damage ~10x. `kismet.py` is the disassembler used.
 
+## Big damage numbers: "345k"
+
+`BattleDamageNumber.SetVisibilityType` draws a number with five Image widgets (units to
+ten-thousands), each sampling one cell of the atlas `UiTX_Battle_DamageFont_atlas` (10 digit
+columns x 5 colour rows; x1 512² and x2 1024², DXT5, one mip) through `M_Texture_Atlas`:
+`Tex_U` = column, `Tex_V` = row, and the grid size is `Split_V` columns x `Split_U` rows (names
+swapped; confirmed on the BP/SP and death-count atlases). `damage_k.py` widens both atlases
+to 20 columns (digit blocks copied unchanged, a "k" per colour in column 10 from
+`data/damage_k.bin`, drawn by `dev/make_damage_k.py` from a Times Bold Italic k painted with
+each row's measured outline / fill / shadow), sets `Split_V` = 20 in both material
+instances, and appends code after the function's END: before the digit loop a number of
+100,000+ becomes `Number / 1000 * 10`, and the units image's `Tex_U` becomes 10. The two
+statements that lead there are overwritten in place by a JUMP padded to their exact disk and
+in-memory size (`kismet.jump_padding`), so no existing offset moves. The "small number" flag
+reuses a bool the function only writes before the loop. Validation rebuilds all five files and
+compares byte for byte, and checks every jump lands on a statement.
+
 ## Not yet verified
 
 - The exact steal-threshold semantics.

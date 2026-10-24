@@ -2,6 +2,10 @@
 
 ## 1.0.0-beta.10
 
+- **Big hits show as thousands: "345k"** (`damage_k`). The game's damage numbers have only
+  five digits, so with the cap at 999,999 a hit of 345,678 showed as 45,678. Damage and
+  healing of 100,000 or more now show as thousands with a "k" (999,999 -> "999k"); under
+  100,000 nothing changes. The battle font gains a "k" in each of its five colours.
 - **Wayfarer's Laurel pays x13 JP and money** (was x3, the same as Fortune's Purse). Only the
   best JP / money item counts (Laurels don't stack with each other or the Purse).
 - **Hard areas top out at danger 108** (world + 12, at most 108; Galdera stays at 104).

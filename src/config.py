@@ -79,6 +79,7 @@ FEATURES = {
     "party_runes": True,          # the Runelord's elemental runes enchant the whole party
     "journal_hints": True,        # side-story journal entries: step-by-step walkthroughs
     "gate_save_point": True,      # a save point in the Gate of Finis's first hall
+    "damage_k": True,             # hits of 100,000+ show as thousands: "345k"
 }
 
 DEFAULT_INI = """\
@@ -141,6 +142,9 @@ party_runes = true
 journal_hints = true
 ; a save point in the Gate of Finis's first hall (the game has none in there)
 gate_save_point = true
+; damage and healing of 100,000 or more show as thousands with a k ("345k"); the game's
+; numbers only have five digits
+damage_k = true
 
 [tuning]
 ; true = the chapter 1s play as vanilla and the preset's values below build up through
@@ -283,6 +287,7 @@ def apply(cfg):
     build_all.TOGGLE_DASH = f["toggle_dash"]
     build_all.JOURNAL_HINTS = f["journal_hints"]
     build_all.GATE_SAVE = f["gate_save_point"]
+    build_all.DAMAGE_K = f["damage_k"]
     import quest_markers
     quest_markers.MODE, quest_markers.FROM = cfg["markers"], cfg["markers_from"]
     build_all.SCALE_SKILLS = f["scale_skills"]
