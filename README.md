@@ -18,8 +18,9 @@ on the optional `catch_up = save`, which only raises EXP, after a backup).
 
 ## Install
 
-1. Download the latest release, right-click the zip and choose **Extract All** (for example
-   to `Documents\OrsterraUnbound`). Keep the files together.
+1. **[Download the latest release](https://github.com/zediiiii/octopath-world-overhaul/releases/latest)**
+   (the `OrsterraUnbound-<version>.zip` file under *Assets*), right-click the zip and choose
+   **Extract All** (for example to `Documents\OrsterraUnbound`). Keep the files together.
 2. Double-click **`OrsterraUnbound`** in the extracted folder. On first run a small
    setup window offers to:
    - make **Steam's Play button and Big Picture** run the overhaul first (Steam restarts once)
